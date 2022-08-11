@@ -1,7 +1,7 @@
 % \todo{Label Convention: Definition related to messaging should be named defn:messaging-xxx. Definition related to AE should be named defn:AE-xxx. Definition related to PIR should be named defn:PIR-xxx.  Definition specific to ASPHR should be named defn:asphr-xxx.}
 \section{General Definitions}
 \label{sec:general-defn}
-In this section, we design a security definition for a messaging application that is as general as possible. Our definition shares many similarities with Canetti and Krawczyk's foundational CK model \cite{CK2001keyexchange} for analyzing key exchange protocols over untrusted channels. However, we find it difficult to adapt the CK models, especially the authenticated-links model(AM), directly to account for metadata privacy. Therefore, we design our security definition from scratch.
+In this section, we design a general security definition for MPMs. Our definition shares many similarities with Canetti and Krawczyk's foundational CK models \cite{CK2001keyexchange}, which define the security of key exchange protocols over untrusted channels. However, we find it difficult to directly adapt the CK models, especially the authenticated-links(AM) model, to account for metadata privacy. Therefore, we design our security definition from scratch.
 
 We start from the following basic principles.
 \begin{enumerate}
@@ -12,7 +12,9 @@ We start from the following basic principles.
 We now translate these principles into mathematical definitions that describe a general messaging system.
 \begin{definition}
 \label{defn:messaging-timestep}
-A \textbf{timestep} is a basic unit of time in our system. This is different from ``rounds" used in most MPM security definitions, since clients do not necessarily transmit real or fake messages at every timestep. Instead, a timestep plays a similar role as a clock cycle in computer hardware — think of it as being 1 nanosecond. We assume that the system starts on timestep $t = 1$. Methods are executed on positive integer timesteps.
+A \textbf{timestep} is a basic unit of time in our system. We assume that the system starts on timestep $t = 1$. Methods are executed on positive integer timesteps.
+
+The timestep is different from ``rounds" used in most MPM security definitions, since clients do not necessarily transmit real or fake messages at every timestep. Instead, a timestep plays a similar role as a clock cycle in computer hardware — think of it as being 1 nanosecond. 
 \end{definition}
 \begin{definition}
 \label{defn:messaging-client-view}
