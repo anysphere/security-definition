@@ -2,38 +2,33 @@
 \label{sec:asphr-defn}
 In this section, we formally define the Anysphere core protocol described in our whitepaper \cite{whitepaper}. 
 \subsection{Cryptography Primitives}
-Anysphere relies on two cryptographical primitives: an authenticated encryption(AE) system, and a PIR scheme. We outline formal simulator-based security definitions of the two.
+Anysphere relies on two cryptographical primitives: an authenticated encryption(AE) system, and a PIR scheme. We outline formal simulator-based security definitions of the two. 
 
-It turns out that our security definition of the PIR scheme is standard and well-documented in literature. However, existing security definitions on the AE system , including IND-CCA2 or even IK-CCA(\cite{BBDP01keyprivate}), are not sufficient. In this section, we introduce a security requirement, called Eval Security, that is sufficient to establish the security of our system.
 \subsubsection{Authenticated Encryption System}
 \label{subsec:AE}
-Our AE scheme consists of a quadruple of algorithms $(\gen, \KX, \enc, \dec)$ with specifications
+Our AE scheme consists of a quadruple of algorithms $(\gen, \enc, \dec)$ with specifications
 \begin{itemize}
-    \item $\gen(1^{\lambda}) \to (\kx^P, \kx^S)$,
-    \item $\KX(\kx_A^P, \kx_B^S) \to \sk_{AB},$
-    \item $\enc(\sk_{AB}, m) \to ct,$
-    \item $\dec(\sk_{BA}, \ct) \to m.$
+    \item $\gen(1^{\lambda}) \to \sk$,
+    \item $\enc(\sk, m) \to ct,$
+    \item $\dec(\sk, \ct) \to m.$
 \end{itemize}
-We require this scheme to be correct, secure, and unforgable. These properties are precisely defined below. Correctness is standard, but security and authentication definitions seem to be non-standard.
+We require this scheme to be correct, secure, and unforgeable. These properties are precisely defined below. The definition of correctness is standard. The definition of privacy and integrity is somewhat novel, but turns out to be implied by a variation of IK-CCA privacy defined in \cite{BBDP01keyprivate}.
+
 \begin{definition}
 \label{defn:AE-correctness}
-Let
-\begin{enumerate}
-    \item $(\kx^P_A, \kx_A^S), (\kx^P_B, \kx_B^S)  \leftarrow \gen(1^{\lambda}).$
-    \item $\sk_{AB} \leftarrow \KX(\kx_A^P,\kx_B^S), \sk_{BA} \leftarrow \KX(\kx_B^P, \kx_A^S).$
-\end{enumerate}
-We say our AE scheme is \textbf{correct} if with probability 1, we have $\sk_{AB} = \sk_{BA}$, and for any plaintext $m$ of length $L_{\ae}$, we have
-$$\dec(\sk_{BA}, \enc(\sk_{AB}, m)) = m.$$
+Let $\sk \leftarrow \gen(1^{\lambda})$. We say our AE scheme is \textbf{correct} if for any plaintext $m$ of length $L_{\ae}$, we have
+$$\dec(\sk, \enc(\sk, m)) = m.$$
 \end{definition}
 \textbf{Remark}: In our implementation, we take $L_{\ae} = 1 \mathsf{KB}$.
+
 \begin{definition}
 \label{defn:AE-eval-oracle}
-Given a key exchange secret key $\kx^S$, and a polynomial time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$, the \textbf{Eval oracle} $\Eval_{f}(\kx^S, \cdot)$ takes as input a "public key" $k$, a set of ciphertexts $\arg_{\ct} = \{\ct_i\}$, and a plaintext argument $\arg_{p}$. It computes 
-$$\sk \leftarrow \KX(k, \kx^S)$$
-$$m_i \leftarrow \dec(\sk, \ct_i).$$ 
-It outputs $\enc(\sk, f(\{m_i\}, \arg_p))$.
+Given a secret key $sk$, and a polynomial time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$, the \textbf{Eval oracle} $\Eval_{f}(\sk, \cdot)$ takes as input a set of ciphertexts $\arg_{\ct} = \{\ct_i\}$, and a plaintext argument $\arg_{p}$. It sets 
+$$m_i \leftarrow \dec(\sk, \ct_i)$$ 
+and outputs $\enc(\sk, f(\{m_i\}, \arg_p))$.
 \end{definition}
-\textbf{Remark}: Note we require $f$'s output to be constant length. The $\Eval$ oracle is stronger than the $\KXE$, but weaker than the $\KXD$ oracle described in \cref{sec:IND-CCPKA}.
+\textbf{Remark}: Note we require $f$'s output to be constant length. 
+
 \begin{definition}
 \label{defn:AE-eval-security}
 Let $N, R$ be polynomial in $\lambda$. Consider the two experiments defined in \cref{expr:AE-real-ideal-world}.
@@ -42,23 +37,21 @@ Let $N, R$ be polynomial in $\lambda$. Consider the two experiments defined in \
 \begin{framed}
 \textbf{Real World Experiment}
 \begin{enumerate}
-    \item For $i$ from $1$ to $N$, $(\kx_i^P, \kx_i^S) \leftarrow \gen(1^{\lambda}).$
-    \item $\cA$ stores $1^{\lambda}, r, \{\kx_i^P\}_{i \in [N]}$.
+    \item For $i$ from $1$ to $N$, $\sk_i \leftarrow \gen(1^{\lambda}).$
     \item For $r$ from $1$ to $R$
     \begin{enumerate}
-        \item $i, j, \ct, \arg_p \leftarrow \cA^{\Eval_f(\{\kx_i^S\}, \cdot)}().$
-        \item $\ct^{0}_r \leftarrow \Eval_f(\kx_i^S, \kx_j^P, \ct, \arg_p)$.
+        \item $i, m \leftarrow \cA^{\Eval_f(\{\sk_i\}, \cdot)}(1^{\lambda}).$
+        \item $\ct^{0}_r \leftarrow \Enc(\sk_i, m)$.
         \item $\cA$ stores $\ct^{0}_r$.
     \end{enumerate}
 \end{enumerate}
 \textbf{Ideal World Experiment}
 \begin{enumerate}
-    \item For $i$ from $1$ to $N$, $(\kx_i^P, \kx_i^S) \leftarrow \gen(1^{\lambda}).$
-    \item $\cA$ stores $1^{\lambda}, r, \{\kx_i^P\}_{i \in [N]}$.
+    \item For $i$ from $1$ to $N$, $\sk_i \leftarrow \gen(1^{\lambda}).$
     \item For $r$ from $1$ to $R$
     \begin{enumerate}
-        \item $i, j, m \leftarrow \cA^{\Eval_f(\{\kx_i^S\}, \cdot)}()$.
-        \item $ct^1_r \leftarrow \Sim(1^{\lambda}, \{(\kx_i^P, \kx_i^S)\}_{i \in [N]})$.
+        \item $i, m \leftarrow \cA^{\Eval_f(\{\sk_i\}, \cdot)}(1^{\lambda}).$
+        \item $\ct^{1}_r \leftarrow \Sim(1^{\lambda})$.
         \item $\cA$ stores $\ct^{1}_r$.
     \end{enumerate}
 \end{enumerate}
@@ -67,9 +60,9 @@ Let $N, R$ be polynomial in $\lambda$. Consider the two experiments defined in \
 \label{expr:AE-real-ideal-world}
 \end{figure}
 
-Then we say the AE scheme is \textbf{Eval-Secure} if there exists a p.p.t simulator $\Sim$ such that for any polynomial-time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$ and any p.p.t adversary with oracle $\cA^O$, the real world experiment and the ideal world experiment are computationally indistinguishable.
+Then we say the AE scheme is Key Indistinguishable if there exists a p.p.t simulator $\Sim$ such that for any polynomial-time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$ and any p.p.t adversary with oracle $\cA^O$, the real world experiment and the ideal world experiment are computationally indistinguishable.
 \end{definition}
-If we use symmetric key encryption with pre-distributed secret keys (as in \cite{angel2016unobservable}), then Eval-Security is implied by IK-CCA \cite[Definition 1]{BBDP01keyprivate}. Since we do not have pre-distributed secret keys, we need to show that the key exchange step is secure as well. In \cref{sec:IND-CCPKA}, we define a new security requirement called IND-CCPKA  and show that Eval-Security is a corollary of IND-CCPKA security. We believe most existing AEAD system should be IND-CCPKA secure, though we are unable to rigorously demonstrate this.\todo{Well... Can we?}
+We will later show that Eval-Security is implied by an analogy of IK-CCA \cite[Definition 1]{BBDP01keyprivate} for symmetric key cryptography. Since the proof is quite lengthy, we will delay it to \cref{sec:IND-CCPKA}.
 
 \begin{definition}
 \label{defn:AE-unforgability}
@@ -79,24 +72,24 @@ Consider the forging experiment described in \cref{expr:AE-forging}.
 \begin{framed}
 \textbf{Forging Experiment}
 \begin{enumerate}
-    \item For $i$ from $1$ to $N$, $(\kx_i^P, \kx_i^S) \leftarrow \gen(1^{\lambda}).$
-    \item $i, j, \ct \leftarrow \cA^{\Eval_f(\{\kx_i^S\}, \cdot)}(1^{\lambda}, \{\kx_i^P\}).$
+    \item For $i$ from $1$ to $N$, $\sk_i \leftarrow \gen(1^{\lambda}).$
+    \item $i, j, \ct \leftarrow \cA^{\Eval_f(\{\sk_i\}, \cdot)}(1^{\lambda}).$
 \end{enumerate}
 \end{framed}
 \caption{Forging Experiment for AE Scheme}
 \label{expr:AE-forging}
 \end{figure}
 
-Let $\ct_{\query, ij}$ be the set of output from queries to the Eval oracle of the form $\Eval_f(\kx_i^S, \kx_j^P, \cdot)$ or $\Eval_f(\kx_j^S, \kx_i^P, \cdot)$.
-
-We say the AE scheme is \textbf{Eval-Unforgable} if there exists a p.p.t simulator $\Sim$ such that for any polynomial-time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$ and any p.p.t adversary with oracle $\cA^O$, we have
-$$\PP(\dec(\KX(\kx_i^S, \kx_j^P), \ct) \neq \bot \land m \notin \ct_{\query, ij}) = \negl(\lambda).$$
+For each $i \in [N]$, let $\ct_{\query, i}$ be the set of output from queries to the Eval oracle of the form $\Eval_f(\sk_i, \cdot)$. We say the AE scheme is \textbf{Eval-Unforgable} if for any polynomial-time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$ and any p.p.t adversary with oracle $\cA^O$, we have
+$$\PP(\dec(\KX(\sk_i), \ct) \neq \bot \land m \notin \ct_{\query, i}) = \negl(\lambda).$$
 \end{definition}
-\todo{Does there exist problem with this definition? I'm fairly certain this gives what we want, but not 100\% sure this is actually correct.}
 
-\textbf{Remark}: A corollary of Eval-Unforgability is the property that if $\{\kx_i^{P}, \kx_i^{S}\}(i = 1,2,3)$ are three randomly generated keypairs, and $\sk_{ij} = \KX(\kx_i^P, \kx_j^S)$, then for any message $m$, 
-$$\Dec(\sk_{12}, \Enc(\sk_{13}, m)) = \bot$$ 
+\textbf{Remark}: A corollary of Eval-Unforgability is the property that if $\sk_1, \sk_2$ are two randomly generated keys then for any message $m$, 
+$$\Dec(\sk_2, \Enc(\sk_1, m)) = \bot$$ 
 with probability $1 - \negl(\lambda)$. This property will be used in the correctness proof.
+
+\subsubsection{Symmetric Key Negotiation}
+Previous MPM systems like Pung and Addra assume each pair of users has an independently generated shared secret key in advance. In this paper, we assume this key is generated by a trusted third party. For users identified by registration info $\reg_0$ and $\reg_1$, the trusted third party delivers their shared secret key to user $\reg_i$ when $\gensharedsecret(\reg_i, \reg_{1 - i})$ is called. In \cite[Section 4]{whitepaper}, we describe separate trust establishment protocols to replace the trusted third party without compromising metadata security.
 \subsubsection{PIR Scheme}
 \label{subsec:PIR}
 Central to our application is the Private Information Retrieval(PIR) scheme. It consists of three efficient algorithms
@@ -105,13 +98,6 @@ Central to our application is the Private Information Retrieval(PIR) scheme. It 
     \item $\answer^{\DB}(1^{\lambda}, \ct) \to a$.
     \item $\dec(1^{\lambda}, \sk, a) \to x_i$.
 \end{itemize}
-% \arvid{Another PIR syntax, which I believe might be more standard?}
-% \begin{itemize}
-%     \item $\query_n(1^{\lambda}, i) \to (q, \mathsf{st})$.
-%     \item $\answer_n(1^{\lambda}, D, q) \to a$.
-%     \item $\dec_n(1^{\lambda}, \mathsf{st}, a) \to d$.
-% \end{itemize}
-% Nevermind! We are recycling the secret key for the PIR queries, because generating the keys is computationally expensive, and it does not affect security (it just becomes slightly less clean)
 where $\DB$ is a length $N$ database with int64 entries, and $N$ is a parameter bounded by some polynomial $N(\lambda)$. It should satisfy the following standard correctness and security definitions \cite{kushilevitz1997replication}.
 \begin{definition}
 \label{defn:PIR-correctness}
@@ -163,9 +149,10 @@ Each client $i$ labels all messages to be sent to another client $j$ with a sequ
 
 Critical to both consistent prefix and eventual consistency is the ACK messages. An ACK message is a special type of messages denoted $\ACK(k)$, encoding a single integer $k$.\footnote{In our implementation, the ACK message is slightly more complicated to take chunking into account.}. When client $j$ sends $\ACK(k)$ to client $i$, it means ``I have read all messages up to message $k$ from you". As we will soon define rigorously, user $i$ will keep broadcasting message $k$ until user $j$ sends $\ACK(k)$, in which case they begin broadcasting message $k + 1$. 
 
-To prevent replay attack, we ensure any ACK message is distinct from any labeled messages generated from user input.\footnote{In our implementation, ACKs and Chunks use different protobuf structs to guarantee this.}
+To prevent replay attacks, we ensure any ACK message is distinct from any labeled messages generated from user input.\footnote{In our implementation, ACKs, and Chunks use different protobuf structs to guarantee this.}
 
-We finish by detailing a subtlety on the length of messages. Let $L_{\msglb}$ denote the length of a labeled message $\msg^lb$, and let $L_{\ct}$ be the length of a ciphertext generated by encoding $\msg^{lb}$ with $\Pi_{\ae}.\enc$. While the input messages have length $L_{\msg}$, the messages client sent to the server have length $L_{\ct}$. We set parameter $L_{\ae} = L_{\msglb}$ in the AE scheme, and $L_{\pir} = L_{\ct}$ in the PIR scheme.
+We finish by detailing the subtlety of the length of messages. Let $L_{\msglb}$ denote the length of a labeled message $\msg^lb$, and let $L_{\ct}$ be the length of a ciphertext generated by encoding $\msg^{lb}$ with $\Pi_{\ae}.\enc$. While the input messages have length $L_{\msg}$, the messages the client sent to the server has length $L_{\ct}$. We set parameter $L_{\ae} = L_{\msglb}$ in the AE scheme, and $L_{\pir} = L_{\ct}$ in the PIR scheme.
+
 \subsection{The Anysphere Core Protocol}
 \todo{I'm going to stick to our actual implementation as closely as possible, please point out anything that doesn't agree with the current protocol, greatly appreciate it.}
 
@@ -201,8 +188,7 @@ $\mathbf{\Pi_{\asphr}.C.\mathsf{Register}}(1^{\lambda}, i, N)$
     \stzh{in other words, the inbox contains messages in [seqstart, seqend].}
     \item Initialize empty maps $\inb, \outb$. The maps take registration info as keys, and arrays of messages as values.\footnote{They are named Friend, Inbox, Outbox in our code. Our code is slightly more complicated to support features like sending to multiple friends and chunking.}
     \item Set a transmission schedule $T_{\trans}$. The user can customize this parameter. We assume $T_{\trans}$ is upper bounded by a constant $T_{\trans}^U$.
-    \item $(\kx^P, \kx^S) \leftarrow \Pi_{\ae}.\gen(1^{\lambda})$. 
-    \item Return $\reg = (i, \kx^P)$.
+    \item Return $\reg = (i)$.
 \end{enumerate}
 \vspace{10pt}
 $\mathbf{\Pi_{\asphr}.S.\mathsf{InitServer}}(1^{\lambda}, N)$.
@@ -234,9 +220,8 @@ If $\cI = \send(\reg, \msg)$,
 If $\cI = \trust(\reg)$.
 \begin{enumerate}
     \item Check if $\reg$ is in $\frienddb$. If so, skip to Phase 2.
-    \item $(i, \kx_f^P) \leftarrow \reg$.
-    \item $sk \leftarrow \Pi_{\ae}.\KX(\kx_f^P, \kx^S).$
-    \item $\frienddb[\reg] \leftarrow \{\sk: sk,  \seqs: 1, \seqe: 0, \seqr: 0\}$.
+    \item $\sk \leftarrow \key(\reg_m, \reg).$ Here $\reg_m$ is the user's own registration information.
+    \item $\frienddb[\reg] \leftarrow \{\sk: \sk,  \seqs: 1, \seqe: 0, \seqr: 0\}$.
 \end{enumerate}
 
 Phase 2:
