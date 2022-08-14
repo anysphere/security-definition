@@ -278,7 +278,7 @@ Using the argument in \cite[Appendix A]{shi2021non}, we can show that IND-metada
 Finally, we define the notion of integrity. Informally, while a malicious server can DoS users, it shouldn't be able to forge messages  or selectively omit messages between honest users. In other words, the system must guarantee consistent prefix, but not eventual consistency.
 \begin{definition}
 \label{defn:messaging-integrity}
-We run the same real-world experiment in \cref{defn:messaging-real-world-experiment}. For any pair of honest users $i, j \in \cH$, define $V_j = (\cF, \cM) \leftarrow C_j.\mathsf{GetView}()$ at the end of the experiment. Then we say the messaging system \textbf{guarantees integrity} if with probability $1 - \negl(\lambda)$, there exists a $t(i) \in [T]$ such that
+We run the same real-world experiment in \cref{expr:messaging-real-world}. For any pair of honest users $i, j \in \cH$, define $V_j = (\cF, \cM) \leftarrow C_j.\mathsf{GetView}()$ at the end of the experiment. Then we say the messaging system \textbf{guarantees integrity} if with probability $1 - \negl(\lambda)$, there exists a $t(i) \in [T]$ such that
 \begin{align*}
      &\{\msg: &&(\reg_i, \msg) \subset \cM\} \\
       =& \{\msg: &&\exists t \leq t(i), \send(\reg_j, \msg) = \cI_{i, t} \land \\

@@ -1,8 +1,8 @@
 \section{Proofs}
 \label{sec:proofs}
 In this section, we prove that our messaging scheme satisfies \cref{defn:messaging-correctness}, \cref{defn:messaging-security}, and \cref{defn:messaging-integrity}. These definitions establish correctness, security, and integrity respectively.
-\subsection{Proof of Correctness}
-We show Consistent Prefix and Eventual Consistency as defined in \cref{defn:messaging-correctness}.
+\subsection{Proof of Correctness and Integrity}
+We show that \cref{defn:messaging-correctness} and \cref{defn:messaging-integrity} both holds.
 
 We first introduce some notations for convenience. Define
 \begin{multline*}
@@ -11,10 +11,10 @@ We first introduce some notations for convenience. Define
 \end{multline*}
 Let $\msg_{ij}(\ell)$ be the $\ell$-th message in $\MSGS(t_0, i, j)$ sorted by time $t$. Let $\msg_{ij}^{lb}(\ell) = (\ell, \msg_{ij}(\ell)).$
 
-\textbf{Consistent Prefix}: We prove a key lemma.
+\textbf{Consistent Prefix}: We need to show that Consistent Prefix We prove a key lemma.
 \begin{lemma}
 \label{lem:messaging-correctness-main}
-Consider the honest server experiment in \cref{expr:messaging-honest-server}. Then with probability $1 - \negl(\lambda)$, for any pair $i \neq j \in [N]$ and any $t \leq T$, the property below holds.
+Consider the real world experiment in \cref{expr:messaging-real-world}. Then with probability $1 - \negl(\lambda)$, for any pair of honest users $i \neq j \in \cH$ and any $t \leq T$, the property below holds.
 
 \textbf{Property: }One of the following holds at the end of timestep $t$.
 
@@ -51,7 +51,7 @@ Furthermore, we have $\msg = \msg_{ij}(E_t)$, and it will be labeled with sequen
 \vspace{10pt}
 $C_i.\Serverrpc$
 \hrule
-The relevant variables will be changed only during ACK decipher when a request is sent during Phase 2 of $C_i.\Userinput$. Let $j' = i_r$ be the PIR index chosen in that phase. No relevant variable changes if $j' \neq j$, so assume $j' = j$. Then by the correctness of $\Pi_{\pir}$, we have
+The relevant variables will be changed only during ACK decipher when a request is sent during Phase 2 of $C_i.\Userinput$. Let $j' = i_r$ be the PIR index chosen in that phase. No relevant variable changes if $j' \neq j$, so assume $j' = j$. Then by the EUF-CMA property of $\Pi_{\ae}$, the deciphered $\ack$ variable must be 
 \begin{align*}
  \ct_{\ack} &= \Pi_{\pir}.\Dec(1^{\lambda}, \sk_{\pir}, a_{\ack})   \\
  &= \Pi_{\pir}.\Dec(1^{\lambda}, \sk_{\pir}, \Pi_{\pir}.\answer^{\ackdb}(1^{\lambda}, \pk_{\pir}, \ct_{\query})) \\
@@ -173,8 +173,8 @@ If $\cI = \trust(\reg)$.
 \begin{enumerate}
     \item Check if $\reg$ is in $\frienddb$. If so, skip to Phase 2.
     \item $i \leftarrow \reg$.
-    \item $\sk \leftarrow \gensharedsecret(\reg_m, \reg).$ Here $\reg_m$ is the user's own registration information.
-    \item $\frienddb[\reg] \leftarrow \{\sk: \sk,  \seqs: 1, \seqe: 0, \seqr: 0\}$.
+    \item $\sk_r, sk_w \leftarrow \gensharedsecret(\reg_m, \reg).$ Here $\reg_m$ is the user's own registration information.
+    \item $\frienddb[\reg] \leftarrow \{\sk: (\sk_r, \sk_w),  \seqs: 1, \seqe: 0, \seqr: 0\}$.
 \end{enumerate}
 
 Phase 2:
@@ -182,7 +182,7 @@ Phase 2:
     \item If $t$ is not divisible by $T_{\trans}$, return $\emptyset$.
     \item Let $\{\reg_1, \cdots, \reg_k\}$ be the keys of $\frienddb$, with $k\leq B$. Construct $S = [\reg_1,\cdots, \reg_k, \reg, \cdots, \reg]$, where we add $B - k$ copies of $\reg = (-1)$, a dummy registration info . Sample $\reg_s, \reg_r$ uniformly and independently at random from $S$. 
     \item Let $\msg$ be the (labeled) message with sequence number $\frienddb[\reg_s].\seqs$ in $\outb[\reg_s]$. If $\outb[\reg_s]$ is empty, let $\msg = (-1, 0^{L_{\msg}})$.
-    \item $\sk \leftarrow \frienddb[\reg_s].\sk$. If $\reg_s$ does not exist in $\frienddb$, randomly generate a secret key $\sk \leftarrow \Pi_{\ae}.\gen(1^{\lambda}).$
+    \item $\sk_w \leftarrow \frienddb[\reg_s].\sk[1]$. If $\reg_s$ does not exist in $\frienddb$, randomly generate a secret key $\sk \leftarrow \Pi_{\ae}.\gen(1^{\lambda}).$
     \item $\seqr \leftarrow \frienddb[\reg_s].\seqr$.
     \item Encrypt Messages with $\sk$.
     
@@ -199,8 +199,8 @@ Phase 2:
     
     
     \begin{itemize}
-        \item $\ct_{\msg} = \Pi_{\ae}.\enc(\sk, \msg).$
-        \item $\ct_{\ack} = \Pi_{\ae}.\enc(\sk, \ACK(\seqr))$.
+        \item $\ct_{\msg} = \Pi_{\ae}.\enc(\sk_w, \msg).$
+        \item $\ct_{\ack} = \Pi_{\ae}.\enc(\sk_w, \ACK(\seqr))$.
     \end{itemize}
     \item Let $\reg_r = (i_r, \_)$. Formulate a PIR request for index $i_r$. 
     
@@ -232,17 +232,17 @@ $\mathbf{\Pi_{\asphr}.C.\Serverrpc}(t, \resp)$
     \item Parse $\resp = (a_{\msg}, a_{\ack})$. Let $\reg_r, \sk_{\pir}$ be defined in the last call to $\Pi_{\asphr}.C.\Userinput$.
     \item $\ct_{\msg} \leftarrow \Pi_{\pir}.\Dec(1^{\lambda}, \sk_{\pir}, a_{\msg}).$
     \item $\ct_{\ack} \leftarrow \Pi_{\pir}.\Dec(1^{\lambda}, \sk_{\pir}, a_{\ack}).$
-    \item $\sk \leftarrow \frienddb[\reg_r].\sk$.
+    \item $\sk_r \leftarrow \frienddb[\reg_r].\sk[0]$.
     \item Decipher the message.
     \begin{enumerate}
-        \item $\msg^{lb} \leftarrow \Pi_{\ae}.\Dec(1^{\lambda}, \sk, \ct_{\msg})$.
+        \item $\msg^{lb} \leftarrow \Pi_{\ae}.\Dec(1^{\lambda}, \sk_r, \ct_{\msg})$.
         \item If $\msg^{lb} = \bot$ or $\msg^{lb}[0]$ is not $\frienddb[\reg_r].\seqr + 1$, ignore the message.
         \item Add $1$ to $\frienddb[\reg_r].\seqr$. 
         \item Let $\msg$ be $\msg^{lb}[1]$. Push $\msg$ to $\inb[\reg_r]$.
     \end{enumerate}
     \item Decipher the ACK.
     \begin{enumerate}
-        \item $\ack \leftarrow \Pi_{\ae}.\Dec(1^{\lambda}, \sk, \ct_{\ack})$.
+        \item $\ack \leftarrow \Pi_{\ae}.\Dec(1^{\lambda}, \sk_r, \ct_{\ack})$.
         \item If $\ack = \bot$ or $\ack$ is not the form $\ACK(k)$ for some $k$, ignore the ack.
         \item Let $\ack = \ACK(k)$. If $k < \frienddb[\reg_r].\seqs$, ignore the ack.
         \item $\frienddb[\reg_r].\seqs \leftarrow k + 1$. Remove the message with sequence number $k$ from $\outb[\reg_r]$.
@@ -251,15 +251,17 @@ $\mathbf{\Pi_{\asphr}.C.\Serverrpc}(t, \resp)$
 
 We use a hybrid argument to show that the two views are indistinguishable. We start from the original implementation of the client methods $\Pi_{\asphr}.C$, and use a hybrid argument to transform it into the simulator methods $\Sim_{\asphr}$. We call the Real World Experiment $\Hyb_0$.  
 
-\todo{The first hybrid here uses a very strong $\Eval$ oracle. The reason is the following: if an adversary $\cA$ exists that breaks indistinguishability, then we want to construct an adversary $\cA_1$ that breaks our security definition \cref{defn:AE-eval-security}. $\cA_1$ has to "simulate" the view of $\cA$ while only knowing the public key of the adversaries. Now assume the adversary $\cA$ establishes trust with a certain malicious public key $k$. Then $\cA_1$ must be able to accurately simulate all the internal state changes related to this public key, since the associated ACKs and messages are contained in the view of $\cA$. On the other hand, $\cA_1$ cannot possibly do this with only the encryption oracle, since $k$ might not have a computable private key. So the Eval oracle comes to the rescue.}
+% The todo's below have been resolved.
 
-\todo{If we can somehow bypass this issue, the length of the paper can be reduced by at least 5 pages. So please share any possible ideas.}
+%\todo{The first hybrid here uses a very strong $\Eval$ oracle. The reason is the following: if an adversary $\cA$ exists that breaks indistinguishability, then we want to construct an adversary $\cA_1$ that breaks our security definition \cref{defn:AE-eval-security}. $\cA_1$ has to "simulate" the view of $\cA$ while only knowing the public key of the adversaries. Now assume the adversary $\cA$ establishes trust with a certain malicious public key $k$. Then $\cA_1$ must be able to accurately simulate all the internal state changes related to this public key, since the associated ACKs and messages are contained in the view of $\cA$. On the other hand, $\cA_1$ cannot possibly do this with only the encryption oracle, since $k$ might not have a computable private key. So the Eval oracle comes to the rescue.}
+
+%\todo{If we can somehow bypass this issue, the length of the paper can be reduced by at least 5 pages. So please share any possible ideas.}
 
 First Hybrid: We add the statements marked Hybrid 1 and run the experiment in \cref{defn:messaging-real-world-experiment}. We call this modified experiment $\Hyb_1$. To argue this preserves indistinguishability, suppose on the contrary that an adversary $\cA$ and a distinguisher $\cD$ can distinguish the view before and after the modification. Then we can build an adversary $\cA_1^O$ and a distinguisher $\cD'$ breaking \cref{defn:AE-eval-security}. 
 
-For the adversary $\cA_1^O$ to simulate the experiment in \cref{defn:messaging-real-world-experiment}, the key idea is to choose a powerful function $f: \Sigma^* \times \Sigma^* \to \Sigma^L$. For each pair of honest users $i, j \in \cH$, define $\data[\reg_i] = (\frienddb[\reg_i], \inb[\reg_i], \outb[\reg_i])$. $\cA_1$ stores a log of changes to $\data$ \textbf{encrypted using $\sk_{ij}$}. Whenever it wants to access or update these data in the client simulation, it calls $\Eval_f$. We choose $f$ to decrypt the log, recover the plaintext of the fields, do the corresponding simulation, then re-encrypt the outputs and updates to the log ($f$ can use $\arg_p$ to determine which line it is on). For such an $f$, $\cA_1^O$ can use $f$ to perfectly simulate client updates on the $\sk$-encrypted $\data[\reg]$. Finally, note that any client outputs computed from $\data$ are $\sk$-encrypted, so $f$ can perfectly simulate client outputs as well. 
+For the adversary $\cA_1^O$ to simulate the experiment in \cref{defn:messaging-real-world-experiment}, the key idea is to choose a powerful function $f: \Sigma^* \times \Sigma^* \to \Sigma^L$. For each pair of honest users $i, j \in \cH$, define $\data[\reg_i] = (\frienddb[\reg_i], \inb[\reg_i], \outb[\reg_i])$. $\cA_1$ stores a log of changes to $\data$ \textbf{encrypted using $\sk_{ij}$}. Whenever it wants to access or update these data in the client simulation, it calls $\Eval_f$. We choose $f$ to decrypt the log, recover the plaintext of the fields, do the corresponding simulation, then re-encrypt the outputs and update to the log ($f$ can use $\arg_p$ to determine which line it is on). For such an $f$, $\cA_1^O$ can use $f$ to perfectly simulate client updates on the $\sk$-encrypted $\data[\reg]$. Finally, note that any client outputs computed from $\data$ are $\sk$-encrypted, so $f$ can perfectly simulate client outputs as well. 
 
-With this choice of $f$, we describe the full $\cA_1^O$. The step numbers below refers to the steps in \cref{defn:messaging-real-world-experiment} unless otherwise indicated. For any $1 \leq i \leq j \leq N$, denote $\sk_{ij} = \sk_{i * N + j}$ as in line (1) of \cref{defn:AE-eval-security}.
+With this choice of $f$, we describe the full $\cA_1^O$. The step numbers below refer to the steps in \cref{defn:messaging-real-world-experiment} unless otherwise indicated. For any $1 \leq i \leq j \leq N$, denote $\sk_{ij} = \sk_{i * N + j}$ as in line (1) of \cref{defn:AE-eval-security}.
 \begin{itemize}
     \item Simulate step (1), (2), (3), and (4.b) identical to \cref{defn:messaging-real-world-experiment}.
     \item After step (2), for each pair of $i, j \in \cH$, $\cA_1$ set\footnote{This is because $\cA_1$ wishes the simulate the honest users as if $\gensharedsecret(\reg_i, \reg_j) = \sk_{ij}$, but $\cA_1$ does not have access to $\sk_{ij}$.} 
@@ -296,6 +298,3 @@ $$\Hyb_{2} \equiv_c \Hyb_3.$$
 We can now conclude that
 $$\Hyb_0 \equiv_c \Hyb_3$$
 Note that $\Hyb_0$ is equal to the real world experiment, and $\Hyb_3$ is equal to the ideal world experiment. Therefore, $\Pi_{\asphr}$ satisfies \cref{defn:messaging-security} as desired. 
-
-\subsection{Proof of Integrity}
-TBD

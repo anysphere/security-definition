@@ -63,27 +63,27 @@ We define the Oracle $\widetilde{\Eval_{j, f}}(\sk_i, \cdot)$ as follows. For th
 For each $j$, define $\Hyb_{\Eval, j}$ as the Real World Experiment with $\Eval_f(\{\sk_i\}, \cdot)$ replaced by $\widetilde{\Eval_{j, f}}(\{\sk_i\}, \Eval, \cdot)$. 
 \end{definition}
 \begin{lemma}
-     Assume $\Pi_{\ae}$ is IK-CCA secure. Then for any $j$, we have 
-    $$\Hyb_{\Eval, j + 1} \equiv_c \Hyb_{\Eval, j}.$$
+     Assume $\Pi_{\ae}$ is IK-CCA secure. Then for any $k$, we have 
+    $$\Hyb_{\Eval, k + 1} \equiv_c \Hyb_{\Eval, k}.$$
 \end{lemma}
 \begin{proof}
-    Let $D$ be any potential distinguisher. We design an adversary $\cA'$ to win the IK-CCA game. Let $i^* \in [N]$ be any index. On line (2) of $\mathbf{Exp}_{\mathsf{IK-CCA}}^{\cA'}$, the adversary $\cA'$ simulates $\Hyb_{\Eval, j}$ with $\sk_{i^*} = \sk_1$, and all other $\sk_i$ randomly generated. $\cA'$ simulates $\cA$ until the $j + 1$-th call to the oracle $\widetilde{\Eval_{j, f}}$. Let $i_{j + 1}, \ct, \arg_p$ be the output of $\cA$. If $i_{j + 1} \neq i^*$, then $\cA'$ just guess randomly. Otherwise, $\cA'$ use the $\Dec$ oracle to compute $m'_i = \Dec(\sk_{i^*}, \ct_i)$. Then it outputs $m_0 = 0^L$, $m_1 = f(\{m'_i\}, \arg_p)$, and exits line (2). Let $\ct$ be the output line (5). $\cA'$ uses $\ct$ as the output of $\widetilde{\Eval_{j, f}}$, then continue to simulate $\Hyb_{\Eval, j, \Real}$ until the end. $\cA'$ returns $b' = 1$ iff $D$ accepts the resulting view.
+    Let $D$ be any potential distinguisher. We design an adversary $\cA'$ to win the IK-CCA game. Let $i^* \in [N]$ be any index. On line (2) of $\mathbf{Exp}_{\mathsf{IK-CCA}}^{\cA'}$, the adversary $\cA'$ simulates $\Hyb_{\Eval, k}$ with $\sk_{i^*} = \sk_1$, and all other $\sk_i$ randomly generated. $\cA'$ simulates $\cA$ until the $k + 1$-th call to the oracle $\widetilde{\Eval_{j, f}}$. Let $i_{k + 1}, j_{k + 1}, \ct = \{\ct_{\ell}\}, \arg_p$ be the output of $\cA$. If $i_{k + 1} \neq i^*$, then $\cA'$ just guess randomly. Otherwise, $\cA'$ use the $\Dec$ oracle to compute $m'_\ell = \Dec(\sk_{j^*}, \ct_\ell)$. Then it outputs $m_0 = 0^L$, $m_1 = f(\{m'_i\}, \arg_p)$, and exits line (2) of $\mathbf{Exp}_{\mathsf{IK-CCA}}^{\cA'}$. Let $\ct$ be the output of line (5). $\cA'$ uses $\ct$ as the output of $\widetilde{\Eval_{k, f}}$, then continue to simulate $\Hyb_{\Eval, k}$ until the end. $\cA'$ returns $b' = 1$ iff $D$ accepts the resulting view.
 
-    We condition on $i_{j + 1} = i^*$. If $b = 1$, then $\cA'$ perfectly simulates $\Hyb_{\Eval, j + 1}$, while if $b = 0$, then $\cA'$ perfectly simulates $\Hyb_{\Eval, j}$. Furthermore, $\cA'$ guarantees that $\ct_{\query} = \emptyset$, since in line (6) of \cref{defn:AE-IK-CCA} $\cA'$ never use the $\Dec$ oracle. Therefore, we have
+    We condition on $i_{k + 1} = i^*$. If $b = 1$, then $\cA'$ perfectly simulates $\Hyb_{\Eval, k + 1}$, while if $b = 0$, then $\cA'$ perfectly simulates $\Hyb_{\Eval, k}$. Furthermore, $\cA'$ guarantees that $\ct_{\query} = \emptyset$, since in line (6) of \cref{defn:AE-IK-CCA} $\cA'$ never use the $\Dec$ oracle. Therefore, we have
     \begin{align*}
      &\PP(\mathbf{Exp}_{\mathsf{IK-CCA}}^{\cA'} = 1) \\
-     &= \frac{1}{2} + \PP(b' = 1, b = 1, i_{j + 1} = i^*) - \PP(b' = 1, b = 0, i_{j + 1} = i^*) \\   
-     &= \frac{1}{2} + \frac{1}{2}\PP(D(\Hyb_{\Eval, j + 1}), i_{j + 1} = i^*)  \\
-     & \quad - \frac{1}{2} \PP(D(\Hyb_{\Eval, j}), i_{j + 1} = i^*).
+     &= \frac{1}{2} + \PP(b' = 1, b = 1, i_{k + 1} = i^*) - \PP(b' = 1, b = 0, i_{k + 1} = i^*) \\   
+     &= \frac{1}{2} + \frac{1}{2}\PP(D(\Hyb_{\Eval, k + 1}), i_{k + 1} = i^*)  \\
+     & \quad - \frac{1}{2} \PP(D(\Hyb_{\Eval, k}), i_{k + 1} = i^*).
     \end{align*}
     By IK-CCA, there exists a negligible function $\mu(\lambda)$ independent of $j$ such that for any $j$, we have
     $$\PP(\mathbf{Exp}_\mathsf{IK-CCA}^{\cA'} = 1) \leq \frac{1}{2} + \mu(\lambda).$$
     Substituting back, and summing over all $i^* \in [N]$, we conclude that
-    $$\PP(D(\Hyb_{\Eval, j + 1})) - \PP(D(\Hyb_{\Eval, j})) \leq \negl(\lambda).$$
+    $$\PP(D(\Hyb_{\Eval, k + 1})) - \PP(D(\Hyb_{\Eval, k})) \leq \negl(\lambda).$$
     Similarly, we can show that
-    $$\PP(D(\Hyb_{\Eval, j + 1, \Real})) - \PP(D(\Hyb_{\Eval, j})) \geq \negl(\lambda)$$
+    $$\PP(D(\Hyb_{\Eval, k + 1, \Real})) - \PP(D(\Hyb_{\Eval, k})) \geq \negl(\lambda)$$
     So we conclude that
-    $$D(\Hyb_{\Eval, j + 1}) \equiv_c D(\Hyb_{\Eval, j}).$$
+    $$D(\Hyb_{\Eval, k + 1}) \equiv_c D(\Hyb_{\Eval, k}).$$
 \end{proof}
 Since $\Hyb_{\Eval, 0}$ is identical to $\Ideal_{\Eval}^{\cA}$, and $\Hyb_{\Eval, R}$ is identical to $\Real_{\Eval}^{\cA}$, we conclude that $\Ideal_{\Eval}^{\cA}$ is indistinguishable with $\Real_{\Eval}^{\cA}$. So $\Pi_{\ae}$ is Eval-Secure as desired.
 
