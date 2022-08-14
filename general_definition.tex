@@ -275,7 +275,7 @@ We say a messaging system is \textbf{IND-metadata secure} if for any $N$ and $T$
 
 Using the argument in \cite[Appendix A]{shi2021non}, we can show that IND-metadata security is equivalent to SIM-metadata security.
 
-Finally, we define the notion of integrity. Informally, while a malicious server can DoS users, it shouldn't be able to forge messages  or selectively omit messages between honest users. In other words, the system must guarantee consistent prefix, but not eventual consistency.
+Finally, we define the notion of integrity. Informally, while a malicious server can DoS users, it shouldn't be able to forge messages  or selectively omit messages between honest users. In other words, the system must guarantee consistent prefix.
 \begin{definition}
 \label{defn:messaging-integrity}
 We run the same real-world experiment in \cref{expr:messaging-real-world}. For any pair of honest users $i, j \in \cH$, define $V_j = (\cF, \cM) \leftarrow C_j.\mathsf{GetView}()$ at the end of the experiment. Then we say the messaging system \textbf{guarantees integrity} if with probability $1 - \negl(\lambda)$, there exists a $t(i) \in [T]$ such that
