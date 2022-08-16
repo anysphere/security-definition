@@ -1,15 +1,16 @@
 \section{Proofs}
 \label{sec:proofs}
-In this section, we prove that our messaging scheme satisfies \cref{defn:messaging-correctness}, \cref{defn:messaging-security}, and \cref{defn:messaging-integrity}. These definitions establish correctness, security, and integrity respectively.
+In this section, we prove that our messaging scheme satisfies \cref{defn:messaging-correctness}, \cref{defn:messaging-security}, and \cref{defn:messaging-integrity} under the $B$-bounded friend scenario. These definitions establish correctness, security, and integrity, respectively.
 \subsection{Proof of Correctness and Integrity}
-We show that \cref{defn:messaging-correctness} and \cref{defn:messaging-integrity} both holds.
+We show that $\Pi_{\asphr}$ satisfies both \cref{defn:messaging-correctness} and \cref{defn:messaging-integrity}.
 
 We first introduce some notations for convenience. Define
-\begin{multline*}
-    \MSGS(t_0, i, j) = \{(t, \msg): \send(\reg_j, \msg) = \cI_{i, t} \land \\
-             \exists t' < t, \trust(\reg_j) = \cI_{i, t'}\}.
-\end{multline*}
-Let $\msg_{ij}(\ell)$ be the $\ell$-th message in $\MSGS(t_0, i, j)$ sorted by time $t$. Let $\msg_{ij}^{lb}(\ell) = (\ell, \msg_{ij}(\ell)).$
+\begin{align*}
+    \MSGS(t_0, i, j) = \{&(t, \msg): t \leq t_0 \land \\
+    &\send(\reg_j, \msg) = \cI_{i, t} \land \\
+             &\exists t' < t, \trust(\reg_j) = \cI_{i, t'}\}.
+\end{align*}
+Let $\msg_{ij}(\ell)$ be the $\ell$-th message in $\MSGS(t_0, i, j)$ sorted by timestep $t$. Let $\msg_{ij}^{lb}(\ell) = (\ell, \msg_{ij}(\ell)).$
 
 \textbf{Consistent Prefix}: First, we show that $\Pi_{\asphr}$ satisfies \cref{defn:messaging-integrity}, and the consistent prefix property in \cref{defn:messaging-correctness}.
 \begin{lemma}
@@ -20,7 +21,7 @@ Consider the real-world experiment in \cref{expr:messaging-real-world}. Then wit
 
 1) $\reg_j \notin C_i.\frienddb, C_i.\outb[\reg_j] = C_j.\inb[\reg_i] = \emptyset$.
 
-2) $\reg_j \in C_i.\frienddb$. Then $\msg_{ij}(\ell)$ is labeled with sequence number $\ell$ for any $\ell$. Furthermore, denote
+2) $\reg_j \in C_i.\frienddb$. Then  for any $\ell$, $\msg_{ij}(\ell)$ is labeled with sequence number $\ell$. Furthermore, denote
 \begin{align*}
 S_t &= C_i.\frienddb[\reg_j].\seqs, \\
 E_t &= C_i.\frienddb[\reg_j].\seqe, \\
@@ -34,7 +35,7 @@ $$C_j.\inb[\reg_i] = \{\msg_{ij}(1), \cdots, \msg_{ij}(R_t)\}.$$
 \begin{proof}
 When $t = 0$, 1) is satisfied since $C_i.\frienddb$ is initialized as empty. We now show if these properties hold for all timesteps before $t$, then they will hold at the end of timestep $t$ with probability $1 - \negl(\lambda)$.
 
-The relevant variables are only modified in Phase 1 of $C_i.\Userinput$, in $C_i.\Serverrpc$ and in $C_j.\Serverrpc$. We show that the lemma is satisfied after each of these methods(no matter which order they execute).
+The relevant variables are only modified in Phase 1 of $C_i.\Userinput$, in $C_i.\Serverrpc$ and in $C_j.\Serverrpc$. We show that the lemma is satisfied after each method (no matter which order they execute).
 
 Phase 1 of $C_i.\Userinput$
 \hrule
@@ -46,27 +47,27 @@ If 2) holds before timestep $t$ starts, then unless $\cI = \send(\reg_j, \msg)$ 
 $$\MSGS(t, i, j) = \MSGS(t - 1, i, j) + (t, \msg).$$
 Thus we have
 $$\abs{\MSGS(t, i, j)} = \abs{\MSGS(t - 1, i, j)} + 1 = E_t.$$
-Furthermore, we have $\msg = \msg_{ij}(E_t)$, and it will be labeled with sequence number $E_t$ by step (3). Thus $\msg^{lb} = \msg^{lb}_{ij}(E_t)$, so the equality with $C_i.\outb[\reg_j]$ is maintained. All the other variables remain unchanged, thus all the desired properties remain true.
+Furthermore, we have $\msg = \msg_{ij}(E_t)$, and it will be labeled with sequence number $E_t$ by step (3) in $\Pi_{\asphr}.C.\mathsf{Input}()$ Phase 1. Thus $\msg^{lb} = \msg^{lb}_{ij}(E_t)$, so the equality with $C_i.\outb[\reg_j]$ is maintained. All the other variables remain unchanged. Thus the property remains true.
 
 \vspace{10pt}
 $C_i.\Serverrpc$
 \hrule
-The relevant variables will be changed only during ACK decipher when a request is sent during Phase 2 of $C_i.\Userinput$. Let $j' = i_r$ be the PIR index chosen in that phase. No relevant variable changes if $j' \neq j$, so assume $j' = j$. We apply the EUF-CMA property of $\Pi_{\ae}$. With probability $1 - \negl(\lambda)$, the $\ack$ variable defined in step (7a) by
+The relevant variables only change during ACK decipher when a request is sent during Phase 2 of $C_i.\Userinput$. Let $j' = i_r$ be the PIR index chosen in that phase. No relevant variable changes if $j' \neq j$, so assume $j' = j$. We apply the EUF-CMA property of $\Pi_{\ae}$. With probability $1 - \negl(\lambda)$, the $\ack$ variable defined in step (7a) by
 $$\ack = \Pi_{\ae}.\Dec(\sk_r, \ct_{\msg})$$
-is either equal to $\bot$, or equal to some other message user $j$ encrypted using $\sk_r$. Since user $j$ only encrypts messages and ACKS to user $i$ using $\sk_r$, we conclude that either $\ack = \ACK(R_{t'})$ for some $t' \leq t - 1$, or $\ack$ is equal to a previous labeled message user $j$ sent to user $j$. 
+is either equal to $\bot$, or equal to a message user $j$ encrypted using $\sk_r$. Since user $j$ only encrypts messages and ACKS to user $i$ using $\sk_r$, we conclude that either $\ack = \ACK(R')$ for some $R' \leq R_{t - 1}$, or $\ack$ is equal to a previous labeled message user $j$ sent to user $j$. 
 
-If $\ack$ is equal to a labeled message or $\bot$, client $i$ will skip step (7c) and (7d), and no variable will be changed. Now consider the case
-$$\ack = \ACK(R_{t'}).$$
+If $\ack$ is equal to a labeled message or $\bot$, client $i$ will skip steps (7c) and (7d), and no variable will be changed. Now consider the case
+$$\ack = \ACK(R').$$
 In step (7.c), we have $C_i.\frienddb[\reg_j].\seqs = S_{t - 1}$. By the induction hypothesis, we have
-$$S_{t - 1} \geq R_{t - 1} \geq R_{t'}.$$
-So no variable is changed unless $S_{t - 1} = R_{t - 1} = R_{t'}$, in which case $S_t = R_{t - 1} + 1$, and after popping $\msg^{lb}_{ij}(S_{t - 1})$ we get
+$$S_{t - 1} \geq R_{t - 1} \geq R'.$$
+So no variable is changed unless $S_{t - 1} = R_{t - 1} = R'$, in which case $S_t = R_{t - 1} + 1$, and after popping $\msg^{lb}_{ij}(S_{t - 1})$ we get
 $$C_i.\outb[\reg_j] = \{\msg^{lb}_{ij}(S_{t - 1} + 1), \cdots, \msg^{lb}_{ij}(E_t)\}.$$
 Thus, the desired properties still hold.
 
 \vspace{10pt}
 $C_j.\Serverrpc$
 \hrule
-If no request is sent during Phase 2 of $C_j.\Userinput$, the proposition is trivial. Otherwise, the relevant variables will be changed only during step (6) (message decipher). Let $i' = i_r$ be the PIR index chosen in that phase. No relevant variable changes if $i' \neq i$, so assume $i' = i$. By EUF-CMA, with probability $1 - \negl(\lambda)$, the deciphered message $\msg^{lb}$ is either $\bot$, or an $\ACK$, or a labeled message sent from user $i$ to user $j$ in a previous timestep $t' \leq t$.  In the first two cases, step (6c) and (6d) are skipped, and no variable is updated. We now consider the last case. In this case, we have
+The relevant variables only change during step (6) (message decipher). Let $i' = i_r$ be the PIR index chosen in the previous call to $C_i.\Userinput$. No relevant variable changes if $i' \neq i$, so assume $i' = i$. By EUF-CMA, with probability $1 - \negl(\lambda)$, the deciphered message $\msg^{lb}$ is either $\bot$, or an ACK message, or a labeled message sent from user $i$ to user $j$ in a previous timestep $t' \leq t$.  In the first two cases, steps (6c) and (6d) are skipped, and no variable is updated. We now consider the last case. In this case, we have
 $$\msg^{lb} = \begin{cases}
 (-1, 0^{L_{\msg}}), S_{t' - 1} > E_{t'}. \\
 \msg_{ij}^{lb}(S_{t' - 1}), S_{t' - 1} \leq E_{t'}. 
@@ -104,16 +105,16 @@ The consistent prefix property in \cref{defn:messaging-correctness} is an easy c
  or
  $$X_{k} - \max(Y_{k - 1}, T_1) > \lambda B^2 T^U_{\mathsf{trans}}$$
  with negligible probability. For each timestep $t$ between $X_k$ and $X_{k + 1}$ such that $t$ divides $C_i.T_{\mathsf{trans}}$, let $j_t$ denote the $i_r$ that $C_i$ chooses, and let $i_t$ denote the $i_s$ that $C_j$ chooses for their last non-empty request to the server before timestep $t + 1$. If $(i_t, j_t) = (i, j)$, we must have $S_{t} \geq k + 1$ by the protocol definition. Furthermore, if we let $K = \ceil{T^U_{\mathsf{trans}} / C_i.T_{\mathsf{trans}}}C_i.T_{\mathsf{trans}}$, then the random variables
- $$(i_t, j_t), (i_{t + K}, j_{t + K}), \cdots$$
-are independent of each other, since both client $i$ and client $j$ must have both made a non-empty request to the server between timestep $(t, t + K]$. Therefore, the probability that $Y_k - X_k > \lambda B^2 T^U_{\mathsf{trans}}$ is at most
+ $$(i_t, j_t), (i_{t + K}, j_{t + K}), (i_{t + 2K}, j_{t + 2K})\cdots$$
+are mutually independent since client $i$ and client $j$ both made a non-empty request to the server during timestep $(t, t + K]$. Therefore, the probability that $Y_k - X_k > \lambda B^2 T^U_{\mathsf{trans}}$ is at most
 $$(1 - B^{-2})^{\lambda B^2 T^U_{\mathsf{trans}} / K} = \negl(\lambda)$$
-as desired. The proof for the second possibility is analogous. Thus, we have demonstrated eventual consistency for the Anysphere protocol.
+as desired. Analogous, the event $X_{k} - \max(Y_{k - 1}, T_1) > \lambda B^2 T^U_{\mathsf{trans}}$ is also negligible. Thus, eventual consistency holds for $\Pi_{\asphr}$.
 \subsection{Proof of Security}
-In this section we construct a simulator $\Sim_{\asphr}$ that shows $\Pi_{\asphr}$ satisfies \cref{defn:messaging-security}. 
+In this section we show that $\Pi_{\asphr}$ satisfies \cref{defn:messaging-security}. 
 
-Let $N'(\lambda) = N(\lambda)^2$ and $R'(\lambda) = 2N'(\lambda)T(\lambda)$. Let $\Sim_{\sym}$ and $\Sim_{\pir}$ be the simulators defined in \cref{defn:AE-eval-security} and \cref{defn:PIR-SIM-security} respectively, with parameters $(N, R) = (N'(\lambda), R'(\lambda))$. At step (2), (4.a), and (4.c) of \cref{expr:messaging-ideal-world}, the simulator $\Pi_{\asphr}$ runs modified versions of the client methods in the corresponding steps of \cref{expr:messaging-real-world} for each $i \in \cH$. 
+Let $N'(\lambda) = N(\lambda)^2$ and $R'(\lambda) = 2N'(\lambda)T(\lambda)$. Let $\Sim_{\sym}$ be a simulator satisfying \cref{defn:AE-eval-security} and with parameters $(N, R) = (N'(\lambda), R'(\lambda))$, and let $\Sim_{\pir}$ be a simulator satisfying \cref{defn:PIR-SIM-security} with parameters $(N, R) = (N(\lambda), R'(\lambda))$. 
 
-We now describe these modifications, which involve changing all cryptography involving unleaked information to simulations. Modifications are marked in red. For each pair of honest users $i, j \in \cH$, let $(\sk_{ij, r}, \sk_{ij, w}) = \gensharedsecret(\reg_i, \reg_j)$ be their shared secret, with $\sk_{ij, r} = \sk_{ji, w}$ the read key of user $i$.
+At step (2), (4.a), and (4.c) of \cref{expr:messaging-ideal-world}, the simulator $\Sim_{\asphr}$ runs modified versions of the client methods in the corresponding steps of \cref{expr:messaging-real-world} for each client $i \in \cH$, which involves changing all cryptography involving unleaked information to simulations. Modifications are marked in red. For each pair of honest users $i, j \in \cH$, let $(\sk_{ij, r}, \sk_{ij, w}) = \gensharedsecret(\reg_i, \reg_j)$ be their shared secret, with $\sk_{ij, r} = \sk_{ji, w}$ the read key of user $i$.
 
 \todo{Hard-coded. Please modify if the $\Pi_{\asphr}$ methods get changed.}
 
@@ -161,8 +162,7 @@ If $\cI = \send(\reg, \msg)$,
 If $\cI = \trust(\reg)$.
 \begin{enumerate}
     \item Check if $\reg$ is in $\frienddb$. If so, skip to Phase 2.
-    \item $i \leftarrow \reg$.
-    \item $\sk_r, sk_w \leftarrow \gensharedsecret(\reg_m, \reg).$ Here $\reg_m$ is the user's own registration information.
+    \item $\sk_r, \sk_w \leftarrow \gensharedsecret(\reg_m, \reg).$ Here $\reg_m$ is the user's own registration information.
     \item $\frienddb[\reg] \leftarrow \{\sk: (\sk_r, \sk_w),  \seqs: 1, \seqe: 0, \seqr: 0\}$.
 \end{enumerate}
 
@@ -200,14 +200,14 @@ Phase 2:
          
      If $\reg_r \in \reg_{\cH}$, 
     \begin{itemize}
-        \item $\ct_{\query} \leftarrow \Sim_{\pir}(1^{\lambda}, n).$
+        \item $\ct_{\query} \leftarrow \Sim_{\pir}(1^{\lambda}).$
     \end{itemize}
     Else, 
     }
     \begin{itemize}
         \item $\ct_{\query}, \sk_{\pir} \leftarrow \Pi_{\pir}.\query(1^{\lambda}, i_r).$
     \end{itemize}
-    \item return $\req = (\ct_{\msg}, \ct_{\ack}, \pk_{\pir}, \ct_{\query})$.
+    \item return $\req = (\ct_{\msg}, \ct_{\ack}, \ct_{\query})$.
     \item Remember $\reg_r$.
 \end{enumerate}
 \vspace{10pt}
@@ -217,21 +217,21 @@ $\mathbf{\Pi_{\asphr}.C.\Serverrpc}(t, \resp)$
 \vspace{5pt}
 {\color{red} \textbf{Hybrid 1'}: if $\reg_r \in \reg_{\cH}$, return.}
 \begin{enumerate}
-    \item If $\resp = \emptyset$, ignore.
+    \item If $\resp = \emptyset$, return.
     \item Parse $\resp = (a_{\msg}, a_{\ack})$. Let $\reg_r, \sk_{\pir}$ be defined in the last call to $\Pi_{\asphr}.C.\Userinput$.
     \item $\ct_{\msg} \leftarrow \Pi_{\pir}.\Dec(1^{\lambda}, \sk_{\pir}, a_{\msg}).$
     \item $\ct_{\ack} \leftarrow \Pi_{\pir}.\Dec(1^{\lambda}, \sk_{\pir}, a_{\ack}).$
     \item $\sk_r \leftarrow \frienddb[\reg_r].\sk[0]$.
     \item Decipher the message.
     \begin{enumerate}
-        \item $\msg^{lb} \leftarrow \Pi_{\ae}.\Dec(1^{\lambda}, \sk_r, \ct_{\msg})$.
+        \item $\msg^{lb} \leftarrow \Pi_{\ae}.\Dec(\sk_r, \ct_{\msg})$.
         \item If $\msg^{lb} = \bot$ or $\msg^{lb}[0]$ is not $\frienddb[\reg_r].\seqr + 1$, ignore the message.
         \item Add $1$ to $\frienddb[\reg_r].\seqr$. 
         \item Let $\msg$ be $\msg^{lb}[1]$. Push $\msg$ to $\inb[\reg_r]$.
     \end{enumerate}
     \item Decipher the ACK.
     \begin{enumerate}
-        \item $\ack \leftarrow \Pi_{\ae}.\Dec(1^{\lambda}, \sk_r, \ct_{\ack})$.
+        \item $\ack \leftarrow \Pi_{\ae}.\Dec(\sk_r, \ct_{\ack})$.
         \item If $\ack = \bot$ or $\ack$ is not the form $\ACK(k)$ for some $k$, ignore the ack.
         \item Let $\ack = \ACK(k)$. If $k < \frienddb[\reg_r].\seqs$, ignore the ack.
         \item $\frienddb[\reg_r].\seqs \leftarrow k + 1$. Remove the message with sequence number $k$ from $\outb[\reg_r]$.
@@ -248,9 +248,9 @@ We use a hybrid argument to show that the two views are indistinguishable. We st
 
 First Hybrid: We add the statements marked Hybrid 1 and run the experiment in \cref{defn:messaging-real-world-experiment}. We call this modified experiment $\Hyb_1$. To argue this preserves indistinguishability, suppose on the contrary that an adversary $\cA$ and a distinguisher $\cD$ can distinguish the view before and after the modification. Then we can build an adversary $\cA_1^O$ and a distinguisher $\cD'$ breaking \cref{defn:AE-eval-security}. 
 
-For the adversary $\cA_1^O$ to simulate the experiment in \cref{defn:messaging-real-world-experiment}, the key idea is to choose a powerful function $f: \Sigma^* \times \Sigma^* \to \Sigma^L$. For each pair of honest users $i, j \in \cH$, define $\data_r[\reg_i] = (\frienddb[\reg_i], \inb[\reg_i], \outb[\reg_i])$. $\cA_1$ stores a log of changes to $\data$ \textbf{encrypted using $\sk = \sk_{ij, r}$}. Whenever it wants to access or update these data in the client simulation, it calls $\Eval_f$. We choose $f$ to decrypt the log, recover the plaintext of the fields, do the corresponding simulation, then re-encrypt the outputs and update to the log ($f$ can use $\arg_p$ to determine which line it is on). For such an $f$, $\cA_1^O$ can use $f$ to perfectly simulate client updates on the $\sk$-encrypted $\data[\reg]$. Finally, note that any client outputs computed from $\data$ are $\sk$-encrypted, so $f$ can perfectly simulate client outputs as well. 
+The adversary $\cA_1^O$ simulates the real-world experiment in \cref{expr:messaging-real-world}. tTe key idea is to choose a powerful function $f: \Sigma^* \times \Sigma^* \to \Sigma^L$. For each pair of honest users $i, j \in \cH$, define $\data_r[\reg_i] = (\frienddb[\reg_i], \inb[\reg_i], \outb[\reg_i])$. $\cA_1$ stores a log of changes to $\data$ \textbf{encrypted using $\sk = \sk_{ij, r}$}. Whenever it wants to access or update these data in the client simulation, it calls $\Eval_f$. We choose $f$ to decrypt the log, recover the plaintext of the fields, do the corresponding simulation, then re-encrypt the outputs and update to the log ($f$ can use $\arg_p$ to determine which line it is on). For such an $f$, $\cA_1^O$ can use $f$ to perfectly simulate client updates on the $\sk$-encrypted $\data[\reg]$. Finally, note that any client outputs computed from $\data$ are encrypted using $\sk_{ij, r}$, so $f$ can also perfectly simulate client outputs. 
 
-With this choice of $f$, we describe the full $\cA_1^O$. The step numbers below refer to the steps in \cref{defn:messaging-real-world-experiment} unless otherwise indicated. For any $1 \leq i \leq j \leq N$, denote $\sk_{ij, r} = \sk_{ji, w} = \sk_{i * N + j}$ and $\sk_{ij, w} = \sk_{ji, r} = \sk_{j * N + i}$ as in line (1) of \cref{defn:AE-eval-security}.
+With this choice of $f$, we describe $\cA_1^O$. For any $1 \leq i, j \leq N$, denote $\sk_{ij, r} = \sk_{ji, w} = \sk_{i * N + j}$, where $\sk_{*}$ are defined line (1) of \cref{defn:AE-eval-security}. The step numbers below refer to the steps in \cref{defn:messaging-real-world-experiment} unless otherwise indicated. 
 \begin{itemize}
     \item Simulate step (1), (2), (3), and (4.b) identical to \cref{defn:messaging-real-world-experiment}.
     \item After step (2), for each pair of $i, j \in \cH$, $\cA_1$ "set"\footnote{What we mean by set is that $\cA_1$ simulates the honest users as if $\gensharedsecret(\reg_i, \reg_j) = \sk_{ij}$. $\cA_1$ does not have access to $\sk_{ij}$.} 
@@ -264,26 +264,26 @@ With this choice of $f$, we describe the full $\cA_1^O$. The step numbers below 
    
     \item On step (4.c), $\cA_1$ simulates client action in $\Pi_{\asphr}.\Serverrpc$ using $\Eval_f$.
 \end{itemize}
-We note that if $b = 0$, i.e. in the real world experiment of \cref{defn:AE-eval-security}, $\cA_1$ perfectly simulates the view of $\cA$ in $\Hyb_0$, while if $b = 1$, i.e. in the ideal world experiment of \cref{defn:AE-eval-security}, $\cA_1$ perfectly simulates the view of $\cA$ in $\Hyb_1$. Thus, $\cA_1$ just need to output the view of $\cA$ at the end of the simulation, and the same distinguisher $\cD' = \cD$ is able to distinguish between the views of $\cA_1$ in the real and ideal world. This contradicts our assumption that $\Pi_{\ae}$ satisfies \cref{defn:AE-eval-security}. Therefore, we finally conclude that
+We note that in $\Real_{\Eval}^{\cA}$, $\cA_1$ perfectly simulates the view of $\cA$ in $\Hyb_0$. In $\Ideal_{\Eval}^{\cA, \Sim_{\ae}}$, $\cA_1$ perfectly simulates the view of $\cA$ in $\Hyb_1$. Thus, $\cA_1$ just need to output the view of $\cA$ at the end of the simulation, and the same distinguisher $\cD' = \cD$ can distinguish between the views of $\cA_1$ in the real and ideal world. This contradicts our assumption that $\Pi_{\ae}$ satisfies \cref{defn:AE-eval-security}. Therefore, we finally conclude that
 $$\Hyb_0 \equiv_c \Hyb_1.$$
 
 Corollary of First Hybrid: We add the statements marked Hybrid 1' and run the experiment in \cref{defn:messaging-real-world-experiment}. We call this modified experiment $\Hyb_{1'}$.
 
-We argue that this hybrid does not change the adversary's view at all: the only thing $\Pi_{\asphr}.C.\Serverrpc$ does is update fields of $\data[\reg_r]$. In $\Hyb_1$, for any $\reg \in \reg_{\cH}$, the fields of $\data[\reg]$ does not affect the output of the client. So adding the statement marked Hybrid 1' does not affect the output of the client. We conclude that
+We argue that this hybrid does not change the adversary's view at all. $\Pi_{\asphr}.C.\Serverrpc$ only updates fields of $\data[\reg_r]$. In $\Hyb_1$, for any $\reg \in \reg_{\cH}$, the fields of $\data[\reg]$ does not affect the client's output. So adding the statement' Hybrid 1' does not affect the client's output. We conclude that
 $$\Hyb_1 \equiv_c \Hyb_{1'}.$$
 
-Second Hybrid: We add the statements marked Hybrid 2, and run the experiment in \cref{defn:messaging-real-world-experiment}. We call this modified experiment $\Hyb_{2}$.
+Second Hybrid: We add the statements marked Hybrid 2 and run the experiment in \cref{defn:messaging-real-world-experiment}. We call this modified experiment $\Hyb_{2}$.
 
-We now show that $\Hyb_{1'}$ and $\Hyb_{2}$ are indistinguishable. Suppose on the contrary that an adversary $\cA$ and a distinguisher $\cD$ can $\Hyb_{1'}$ and $\Hyb_{2}$. Then we can build an adversary $\cA_2$ and a distinguisher $\cD'$ breaking \cref{defn:PIR-SIM-security}. 
+We argue by contradiction that $\Hyb_{1'}$ and $\Hyb_{2}$ are indistinguishable. Suppose that an adversary $\cA$ and a distinguisher $\cD$ can $\Hyb_{1'}$ and $\Hyb_{2}$. Then we can build an adversary $\cA_2$ and a distinguisher $\cD'$ breaking \cref{defn:PIR-SIM-security}. 
 
 $\cA_2$ simulates a modified version of $\Hyb_1$. $\cA_2$ simulates line (1, 2, 3, 4b, 4c) in \cref{defn:messaging-real-world-experiment} verbatim as in both $\Hyb_{1'}$ and $\Hyb_2$. On line (4a), $\cA_2$ simulates everything but Phase 2 step (7) verbatim. When it reaches Phase 2 step (7), if $\reg_r \notin \reg_{\cH}$ then it simulates this step verbatim as well. If $\reg_r \in \reg_{\cH}$, then $\cA_2$ returns $i_r$ and exits line (1a) of the experiment in \cref{defn:PIR-SIM-security}. Let $\ct^b_r$ be the return value of line (1b). $\cA_2$ sets $\ct_{\query} = \ct^b_r$ and continues simulation.
 
-Note that contrary to the previous scenario, $\cA_2$ knows all the key exchange secret keys. Furthermore, if $\reg_r \notin \reg_{\cH}$, $\cA_2$ knows $\sk_{\pir}$ generated by $\Pi_{\asphr}.C.\Userinput$. If $\reg_r \notin \reg_{\cH}$, then $\cA_2$ does not know the $\sk_{\pir}$, but this $\sk_{\pir}$ will never be used since Hybrid 1' ensures that $\Pi_{\asphr}.C.\Serverrpc$ is skipped. Thus, we conclude that $\cA_2$ can complete the simulation.
+Contrary to the first hybrid, $\cA_2$ knows all the key exchange secret keys. Furthermore, if $\reg_r \notin \reg_{\cH}$, $\cA_2$ knows $\sk_{\pir}$ generated by $\Pi_{\asphr}.C.\Userinput$. If $\reg_r \notin \reg_{\cH}$, then $\cA_2$ does not know the $\sk_{\pir}$, but this $\sk_{\pir}$ will never be used since Hybrid 1' ensures that $\Pi_{\asphr}.C.\Serverrpc$ is skipped. Thus, we conclude that $\cA_2$ can complete the simulation.
 
-Note that in the real world experiment of \cref{defn:PIR-SIM-security}, $\cA_2$ simulates $\Hyb_{1'}$ verbatim, while in the ideal world experiment of $\cref{defn:PIR-SIM-security}$, $\cA_2$ simulates $\Hyb_2$ verbatim. Thus, $\cA_2$ just need to output the view of $\cA$ at the end of the simulation, and the same distinguisher $\cD' = \cD$ is able to distinguish between the views of $\cA_1$ in the real and ideal world. This contradicts our assumption that $\Pi_{\pir}$ satisfies \cref{defn:PIR-SIM-security}. Therefore, we conclude that
+In $\Real_{\pir}^{\cA}$, $\cA_2$ simulates $\Hyb_{1'}$ verbatim, while in $\Ideal_{\pir}^{\cA, \Sim}$, $\cA_2$ simulates $\Hyb_2$ verbatim. Thus, $\cA_2$ just need to output the view of $\cA$ at the end of the simulation, and the same distinguisher $\cD' = \cD$ can distinguish between the views of $\cA_1$ in the real and ideal world. This contradicts our assumption that $\Pi_{\pir}$ satisfies \cref{defn:PIR-SIM-security}. Therefore, we conclude that
 $$\Hyb_{1'} \equiv_c \Hyb_2.$$
-Third Hybrid: We add the statements marked Hybrid 3, and run the experiment in \cref{defn:messaging-real-world-experiment}. We call this modified experiment $\Hyb_{3}$. This modification does not change the view of the adversary at all: after all the changes in Hybrid 1, 1' and 2, for any $\reg \in \reg_{\cH}$, the contents of $\frienddb[\reg], \inb[\reg], \outb[\reg]$ does not affect the client's output. In particular, the way $\reg_s$ and $\reg_r$ are selected ensures that whether $\reg$ lies in $\frienddb$ or not does not affect the distribution of $\reg_s$ or $\reg_r$. For any $\reg \notin \reg_{\cH}$, Hybrid 3 does not affect how $\frienddb[\reg], \inb[\reg], \outb[\reg]$ are updated. So we have shown
+Third Hybrid: We add the statements marked Hybrid 3, and run the experiment in \cref{defn:messaging-real-world-experiment}. We call this modified experiment $\Hyb_{3}$. This modification does not change the view of the adversary at all. After the changes in Hybrid 1, 1', and 2, for any $i, j \in \cH$, the contents of $C_i.\frienddb[\reg_j], C_i.\inb[\reg_j], C_i\outb[\reg_j]$ does not affect client $i$ output. (In particular, whether $\reg$ lies in $\frienddb$ or not does not affect the distribution of $\reg_s$ or $\reg_r$). For any $\reg \notin \reg_{\cH}$, Hybrid 3 does not affect updates to $C_i.\frienddb[\reg], C_i.\inb[\reg]$, and $C_i\outb[\reg]$. So we conclude
 $$\Hyb_{2} \equiv_c \Hyb_3.$$
-We can now conclude that
+Finally, we conclude that
 $$\Hyb_0 \equiv_c \Hyb_3$$
-Note that $\Hyb_0$ is equal to the real world experiment, and $\Hyb_3$ is equal to the ideal world experiment. Therefore, $\Pi_{\asphr}$ satisfies \cref{defn:messaging-security} as desired. 
+Note that $\Hyb_0 = \Real_{\msg}^{\cA}$ and $\Hyb_3 = \Ideal_{\msg}^{\cA, \Sim_{\asphr}}$,. Therefore, $\Pi_{\asphr}$ satisfies \cref{defn:messaging-security}.
