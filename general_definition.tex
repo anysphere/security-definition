@@ -176,7 +176,7 @@ We first define the real-world experiment.
 
 \begin{definition}
 \label{defn:messaging-real-world-experiment}
-The real-world experiment uses the parameters $\lambda, N, T$ in \cref{defn:messaging-honest-server-experiment}. Furthermore, let $\cA$ be a stateful p.p.t. adversary. Let $\cH$ denote the set of honest clients the adversary chooses. Denote $\reg_{\cH} = \reg_{\cH}$ to be the registration info of honest clients. The experiment $\Real_{\msg}^{\cA}(1^{\lambda})$ is described in \cref{expr:messaging-real-world}.
+The real-world experiment uses the parameters $\lambda, N, T, \cH$ in \cref{defn:messaging-honest-server-experiment}. Let $\cA$ be a stateful p.p.t. adversary. The experiment $\Real_{\msg}^{\cA}(1^{\lambda})$ is described in \cref{expr:messaging-real-world}.
 \end{definition}
 
 \begin{figure}[!ht]
@@ -247,7 +247,7 @@ Finally, we define metadata security.
 
 \begin{definition}
 \label{defn:messaging-security}
-We say a messaging system is \textbf{SIM-metadata secure} if for any $N$ and $T$ polynomially bounded in $\lambda$, there exists a p.p.t simulator $\Sim$ such that for any p.p.t adversary $\cA$, the view of $\cA$ is indistinguishable in $\mathsf{Real}^{\cA}(1^{\lambda})$ and $\mathsf{Ideal}^{\cA, \mathsf{\Sim}}(1^{\lambda})$.
+We say a messaging system is \textbf{SIM-metadata secure} if there exists a p.p.t simulator $\Sim$ such that for any p.p.t adversary $\cA$, the view of $\cA$ is indistinguishable in $\mathsf{Real}_{\msg}^{\cA}(1^{\lambda})$ and $\mathsf{Ideal}^{\cA, \mathsf{\Sim}}_{\msg}(1^{\lambda})$.
 \end{definition}
 
 % Arvid's notes because this confused him for several hours.
