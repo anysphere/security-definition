@@ -7,12 +7,13 @@ We start from the following basic principles.
 \begin{enumerate}
     \item The messaging system has a centralized server in charge of storing and routing messages. We do not consider decentralized messaging systems in this paper.
     \item The messaging system has a large number of users, interacting with "client" software on their computers. The client software should allow the user to register, add friends, and send messages at any time. It should display received messages to the user.
-    \item The messaging application should hide metadata of conversations between honest users from a powerful adversary that controls the server, the network, and a subset of clients. 
+    \item The messaging system should hide metadata of conversations between honest users from a powerful adversary that controls the server, the network, and a subset of clients. 
+    \item The messaging system should be reasonably robust. As long as the server functions normally, even if the adversary compromises some users, it should not disrupt conversations between honest users.
 \end{enumerate}
 We now translate these principles into mathematical definitions that apply to a general messaging system.
 \begin{definition}
 \label{defn:messaging-timestep}
-A \textbf{timestep} is a basic unit of time in our system. We assume that the system starts on timestep $t = 1$. Methods are executed on positive integer timesteps.
+A \textbf{timestep} is our system's basic unit of time. We assume that the system starts on timestep $t = 1$. Methods are executed on positive integer timesteps.
 
 The timestep is different from ``rounds" used in most MPM security definitions, since clients do not necessarily transmit real or fake messages at every timestep. Instead, a timestep plays a similar role as a clock cycle in computer hardware — think of it as being 1 nanosecond. 
 \end{definition}
@@ -54,7 +55,7 @@ Client Side Algorithms for the stateful client $C$.
     
     \item $C.\Serverrpc(t, \resp)$. This algorithm handles the server's response $\resp$ and updates client storage.
     
-    \item $C.\mathsf{GetView}() \to V$. This algorithm outputs the view of the client (\cref{defn:messaging-client-view}). Its output is passed to the GUI and displayed to the user.
+    \item $C.\mathsf{GetView}() \to V$. This algorithm outputs the client's view (\cref{defn:messaging-client-view}). Its output is passed to the GUI and displayed to the user.
 \end{itemize}
 
 Server Side Algorithms for the stateful server $S$.
@@ -70,7 +71,7 @@ Now we can describe some desired properties of MPM systems. In the rest of this 
 
 \subsection{Correctness}
 \label{subsec:messaging-correctness}
-First, we describe how the server and clients interact when all parties behave honestly. We call this scenario the Honest Server Experiment.
+First, we describe how the server and clients interact when the server behaves honestly. We call this scenario the Honest Server Experiment. To enforce robustness, an adversary controls a subset of users and passively monitors all conversations.
 
 \begin{definition}  \hfill\\
 \label{defn:messaging-honest-server-experiment}
@@ -81,22 +82,28 @@ The honest server experiments take the following parameters
     \item $N = N(\lambda)$, the number of clients, a polynomially-bounded function of $\lambda$.
     \item $T = T(\lambda)$, the number of timesteps, a polynomially-bounded function of $\lambda$.
     \item For each client $i \in [N]$ and timestep $t \in [T]$, a user input $\cI_{i, t}$.
+    \item A set of honest clients $\cH \subset [N]$.
+    \item A stated p.p.t adversary $\cA$.
 \end{enumerate}
 
-Let $S$ denote the server machine, let $\{C_i\}_{i = 1}^N$ denote the client machines. The experiment is described below.
+Let $S$ denote the server machine, and let $\{C_i\}_{i \in \cH}$ denote the honest client machines. The experiment is described below.
 \begin{figure}[ht!]
 \begin{framed}
 \textbf{Honest Server Experiment}
 \begin{enumerate}
 \item $S.\mathsf{InitServer}(1^{\lambda}, N)$. 
-\item For each $i \in [N]$, $\reg_i \leftarrow C_i.\Register(1^{\lambda}, i, N)$. 
+\item For each $i \in \cH$, $\reg_i \leftarrow C_i.\Register(1^{\lambda}, i, N)$. 
 \item For $t$ from $1$ to $T$:
     \begin{enumerate}
-    \item For each $i \in [N]$, $\req_i \leftarrow C_i.\Userinput(t, \cI)$.
+    \item For each $i \in \cH$, $\req_i \leftarrow C_i.\Userinput(t, \cI)$.
+
+    \item $\{\req_i\}_{i \in [N] - \cH} \leftarrow \cA(\{\req_i\}_{i \in \cH})$.
     
     \item $\{\resp_i\} \leftarrow S.\Clientrpc(t, \{\req_i\})$.
     
-    \item For each $i \in [N]$, $C_i.\Serverrpc(t, \resp_i)$.
+    \item For each $i \in \cH$, $C_i.\Serverrpc(t, \resp_i)$.
+
+    \item $\cA$ stores $\{\resp_i\}_{i \in [N]}$.
     \end{enumerate}
 \end{enumerate}
 \end{framed}
@@ -107,7 +114,7 @@ Let $S$ denote the server machine, let $\{C_i\}_{i = 1}^N$ denote the client mac
 \end{definition}
 
 \arvid{Do we want an adversary to be able to control some of the clients? Ideally, I think we would want to because we want to guarantee resistance against denial of service attacks from clients}
-\stzh{Good idea. I'll come back to this after I finish the security proof in the current iteration.}
+\stzh{Good idea. I'll return to this after finishing the security proof in the current iteration.}
 
 In this case, we expect the client's view to be "correct". We first need to define what "correct" means here. Informally speaking, the correct view should satisfy
 \begin{enumerate}
