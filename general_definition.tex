@@ -254,14 +254,14 @@ We say a messaging system is \textbf{SIM-metadata secure} if there exists a p.p.
 % Think of \mathcal{A} as the Distinguisher's right hand! Or, another way of saying it — it is an adversary *against* the Simulator, NOT the adversary that is trying to attack the system in the wild.
 % Suppose X is an NSA spy (i.e., real world adversary). Then, the security definition has shown us that the Simulator is a really really good simulator — even when you try super hard to break it, you cannot. Hence, X's view in the real world will be the same as X's view in a world where everyone else is simulated by the Simulator. This means that X might as well be running in a vacuum, and hence cannot ever learn any information whatsoever.
 
-The simulator based definition is a relatively new way of writing security definitions. For readers more accustomed to indistinguishability-based security definitions, we include an equivalent security definition.
+The simulator-based definition is a relatively new way of writing security definitions. We include an equivalent security definition for readers more accustomed to indistinguishability-based security definitions.
 \begin{definition}
 \label{defn:messaging-ind-experiment}
 We use the same notations as in \cref{defn:messaging-ideal-world-experiment}. For parameter $b \in \{0, 1\}$, the IND experiment $\Ind_b^{\cA}$ is described in \cref{expr:messaging-IND}.
 
 \begin{figure}[!h]
 \begin{framed}
-\textbf{IND Experiment}
+\textbf{IND Experiment} $\Ind_b^{\cA}$
 \begin{enumerate}
 \item $\cH \leftarrow \cA(1^{\lambda}, N, T)$.
 \item For each $i \in \cH$, $\reg_i \leftarrow C_i.\Register(1^{\lambda}, i, N)$. 
