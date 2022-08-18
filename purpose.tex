@@ -30,6 +30,8 @@ We use the following notational conventions.
     
     \item Given an oracle $O(x, \cdot)$ and a series $\{x_i\}$, define $O(\{x_i\}, \cdot)$ as the oracle whose input takes an extra argument $j$ and outputs $O(\{x_i\}_i, j, \arg) = O(x_j, \arg)$.
 
+    \item Given a series $\{a_i\}$, and a set of indices $S$, let $a_S$ denote $\{a_i\}_{i \in S}$. 
+
     \item When we say two experiments are indistinguishable, we mean the view of the adversary in the two experiments are indistinguishable. The view of the adversary consists of all inputs, outputs, and internal randomness of the adversary.
     
     \item When machines "return" in a method, they do not execute any subsequent commands and exit the method immediately.

@@ -104,7 +104,7 @@ The consistent prefix property in \cref{defn:messaging-correctness} is an easy c
  $$Y_k - X_k > \lambda B^2 T^U_{\mathsf{trans}}$$
  or
  $$X_{k} - \max(Y_{k - 1}, T_1) > \lambda B^2 T^U_{\mathsf{trans}}$$
- with negligible probability. For each timestep $t$ between $X_k$ and $X_{k + 1}$ such that $t$ divides $C_i.T_{\mathsf{trans}}$, let $j_t$ denote the $i_r$ that $C_i$ chooses, and let $i_t$ denote the $i_s$ that $C_j$ chooses for their last non-empty request to the server before timestep $t + 1$. If $(i_t, j_t) = (i, j)$, we must have $S_{t} \geq k + 1$ by the protocol definition. Furthermore, if we let $K = \ceil{T^U_{\mathsf{trans}} / C_i.T_{\mathsf{trans}}}C_i.T_{\mathsf{trans}}$, then the random variables
+ with negligible probability. For each timestep $t$ between $X_k$ and $X_{k + 1}$ such that $t$ divides $C_i.T_{\mathsf{trans}}$, let $j_t$ denote the $i_r$ that $C_i$ chooses, and let $i_t$ denote the $i_s$ that $C_j$ chooses for their last non-empty request to the server before timestep $t + 1$. If $(i_t, j_t) = (i, j)$, we must have $S_{t} \geq k + 1$ by the protocol definition since $C_i$ reads the ACK message $C_j$ deposited to the server database. Furthermore, if we let $K = \ceil{T^U_{\mathsf{trans}} / C_i.T_{\mathsf{trans}}}C_i.T_{\mathsf{trans}}$, then the random variables
  $$(i_t, j_t), (i_{t + K}, j_{t + K}), (i_{t + 2K}, j_{t + 2K})\cdots$$
 are mutually independent since client $i$ and client $j$ both made a non-empty request to the server during timestep $(t, t + K]$. Therefore, the probability that $Y_k - X_k > \lambda B^2 T^U_{\mathsf{trans}}$ is at most
 $$(1 - B^{-2})^{\lambda B^2 T^U_{\mathsf{trans}} / K} = \negl(\lambda)$$
