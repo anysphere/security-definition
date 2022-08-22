@@ -13,7 +13,7 @@ Consider the following distinguishing experiment, where $N = N(\lambda)$ is poly
 Distinguishing Game $\mathbf{Exp}_{\mathsf{IK-CCA}}^{\cA}$
 \begin{enumerate}
     \item $\sk_0, \sk_1 \leftarrow \gen(1^{\lambda}).$
-    \item $m_0, m_1 \leftarrow \cA^{\Enc(\{\sk_{i}\}, \cdot), \Dec(\{\sk_{i}\}, \cdot)}(1^{\lambda}, kx_{i}^P).$
+    \item $m_0, m_1 \leftarrow \cA^{\Enc(\{\sk_{i}\}, \cdot), \Dec(\{\sk_{i}\}, \cdot)}(1^{\lambda}).$
     \item $b \leftarrow U(\{0, 1\})$.
     \item $\ct \leftarrow \Enc(\sk_b, m_b).$
     \item $b' \leftarrow \cA^{\Enc(\{\sk_{i}\}, \cdot), \Dec(\{\sk_{i}\}, \cdot)}(\ct)$.

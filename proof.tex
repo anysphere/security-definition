@@ -114,9 +114,13 @@ In this section we show that $\Pi_{\asphr}$ satisfies \cref{defn:messaging-secur
 
 Let $N'(\lambda) = N(\lambda)^2$ and $R'(\lambda) = 2N'(\lambda)T(\lambda)$. Assume the simulator $\Sim_{\sym}$ satisfy \cref{defn:AE-eval-security} with parameters $(N, R)$ equal to $(N'(\lambda), R'(\lambda))$, and let $\Sim_{\pir}$ be a simulator satisfying \cref{defn:PIR-SIM-security} with parameters $(N, R) = (N(\lambda), R'(\lambda))$. 
 
-At step (2), (4.a), and (4.c) of \cref{expr:messaging-ideal-world}, the simulator $\Sim_{\asphr}$ runs modified versions of the client methods in the corresponding steps of \cref{expr:messaging-real-world} for each client $i \in \cH$, which involves changing all cryptography involving unleaked information to simulations. Modifications are marked in red. For each pair of honest users $i, j \in \cH$, let $(\sk_{ij, r}, \sk_{ij, w}) = \gensharedsecret(\reg_i, \reg_j)$ be their shared secret, with $\sk_{ij, r} = \sk_{ji, w}$ the read key of user $i$.
+At step (2), (4.a), and (4.c) of \cref{expr:messaging-ideal-world}, the simulator $\Sim_{\asphr}$ runs modified versions of the client methods in the corresponding steps of \cref{expr:messaging-real-world} for each client $i \in \cH$. Modifications are marked with a sideline. 
 
-\todo{Hard-coded. Please modify if the $\Pi_{\asphr}$ methods get changed.}
+For each pair of honest users $i, j \in \cH$, let 
+$$(\sk_{ij, r}, \sk_{ij, w}) = \gensharedsecret(\reg_i, \reg_j)$$ 
+be their shared secret, with $\sk_{ij, r} = \sk_{ji, w}$ being the read key of user $i$ for messages from user $j$.
+
+%\todo{Hard-coded. Please modify if the $\Pi_{\asphr}$ methods get changed.}
 
 \vspace{10pt}
 
@@ -127,14 +131,15 @@ $\mathbf{\Sim_{\asphr}.\Register}(1^{\lambda}, i, N)$
 No modification.
 \vspace{10pt}
 
-$\mathbf{\Sim_{\asphr}.\Userinput}(t, i, {\color{red} \textbf{Hybrid 3:} \text{replace $\cI$ with $\Leak$}})$
+$\mathbf{\Sim_{\asphr}.\Userinput}(t, i, { \textbf{Hybrid 3:} \text{replace $\cI$ with $\Leak$}})$
 \vspace{5pt}
 \hrule
 \vspace{5pt}
 Phase 1: 
 
+\begin{siderule}
 {
-\color{red} 
+ 
 
 \textbf{Hybrid 3}:
 
@@ -147,6 +152,7 @@ Initialize $\cI$.
 \end{enumerate}
 
 }
+\end{siderule}
 
 If $\cI = \emptyset$, do nothing. 
 
@@ -174,17 +180,19 @@ Phase 2:
     \item $\sk_w \leftarrow \frienddb[\reg_s].\sk[1]$. If $\reg_s$ does not exist in $\frienddb$, randomly generate a secret key $\sk \leftarrow \Pi_{\ae}.\gen(1^{\lambda}).$
     \item $\seqr \leftarrow \frienddb[\reg_s].\seqr$.
     \item Encrypt Messages with $\sk$.
-    
-    {\color{red} 
-    \textbf{Hybrid 1}:
-    
-    If $\reg_s \in \reg_\cH$, 
-    \begin{itemize}
-        \item $\ct_{\msg} \leftarrow \Sim_{\sym}(1^{\lambda}),$
-        \item $\ct_{\ack} \leftarrow \Sim_{\sym}(1^{\lambda}),$
-    \end{itemize}
-    Else, 
-    }
+
+    \begin{siderule}
+        { 
+        \textbf{Hybrid 1}:
+        
+        If $\reg_s \in \reg_\cH$, 
+        \begin{itemize}
+            \item $\ct_{\msg} \leftarrow \Sim_{\sym}(1^{\lambda}),$
+            \item $\ct_{\ack} \leftarrow \Sim_{\sym}(1^{\lambda}),$
+        \end{itemize}
+        Else, 
+        }
+    \end{siderule}
     
     
     \begin{itemize}
@@ -192,9 +200,10 @@ Phase 2:
         \item $\ct_{\ack} = \Pi_{\ae}.\enc(\sk_w, \ACK(\seqr))$.
     \end{itemize}
     \item Let $\reg_r = (i_r, \_)$. Formulate a PIR request for index $i_r$. 
-    
+
+     \begin{siderule}
      {
-     \color{red}
+     
           
      \textbf{Hybrid 2}:
          
@@ -204,6 +213,7 @@ Phase 2:
     \end{itemize}
     Else, 
     }
+    \end{siderule}
     \begin{itemize}
         \item $\ct_{\query}, \sk_{\pir} \leftarrow \Pi_{\pir}.\query(1^{\lambda}, i_r).$
     \end{itemize}
@@ -215,7 +225,9 @@ $\mathbf{\Pi_{\asphr}.C.\Serverrpc}(t, \resp)$
 \vspace{5pt}
 \hrule
 \vspace{5pt}
-{\color{red} \textbf{Hybrid 1'}: if $\reg_r \in \reg_{\cH}$, return.}
+\begin{siderule}
+{ \textbf{Hybrid 1'}: if $\reg_r \in \reg_{\cH}$, return.}
+\end{siderule}
 \begin{enumerate}
     \item If $\resp = \emptyset$, return.
     \item Parse $\resp = (a_{\msg}, a_{\ack})$. Let $\reg_r, \sk_{\pir}$ be defined in the last call to $\Pi_{\asphr}.C.\Userinput$.
