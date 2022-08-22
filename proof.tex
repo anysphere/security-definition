@@ -79,13 +79,11 @@ Thus, the desired properties still hold.
 We have proven that the desired properties hold at the end of timestep $t$ with probability $1 - \negl(\lambda)$.
 \end{proof}
 We now show that $\Pi_{\asphr}$ satisfies \cref{defn:messaging-integrity}. We use the notations in \cref{lem:messaging-correctness-main}. Let $(\cF, \cM) = C_j.\mathsf{GetView}()$. Take $t(j) = T_0$. Unpacking the definition of $\cF$ and $\cM$, we need to verify that for each $i \in [N]$, with probability $1 - \negl(\lambda)$ there exists a $t(i) \leq T_0$ such that
- 
  \begin{multline*}
  C_j.\inb[\reg_i] = \{\msg: \exists t \leq t(i), \send(\reg_j, \msg) = \cI_{i, t} \land \\
  \exists t' < t, \trust(\reg_j) = \cI_{i, t'} \land \\
  \exists t'' \leq T_0, \trust(\reg_i) = \cI_{j, t''}\}.   
  \end{multline*} 
- %That a) holds is easy to see, since by the protocol definition, $\reg_i$ is inserted into $C_j.\frienddb$ during timestep $t$ if and only if $\trust(\reg_i) = \cI_{j, t}$, and it is never removed. 
   If $i = j$, then the equation holds for $t(j) = T_0$ since messages to oneself are deposited to $C_j.\inb$ immediately in Phase 1 of $\Pi_{\asphr}.C.\mathsf{input}$. Now assume $i \neq j.$ 
  
  We show that $t(i)$ exists as long as \cref{lem:messaging-correctness-main} holds at the current timestep $T_0$. We consider which scenario in the lemma holds. 
@@ -221,7 +219,7 @@ Phase 2:
     \item Remember $\reg_r$.
 \end{enumerate}
 \vspace{10pt}
-$\mathbf{\Pi_{\asphr}.C.\Serverrpc}(t, \resp)$
+$\mathbf{\Sim_{\asphr}.\Serverrpc}(t, \resp)$
 \vspace{5pt}
 \hrule
 \vspace{5pt}

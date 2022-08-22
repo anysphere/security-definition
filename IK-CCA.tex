@@ -1,6 +1,6 @@
 \section{IK-CCA implies Eval-Security}
 \label{sec:IND-CCPKA}
-In this section, we propose a symmetric key analog of the IK-CCA security introduced by Bellare et. al. in \cite[Definition 1]{BBDP01keyprivate}
+In this section, we propose a symmetric key analog of the IK-CCA security introduced by Bellare et. al. in \cite[Definition 1]{BBDP01keyprivate}.
 We then show that IK-CCA security implies the Eval-Security \cref{defn:AE-eval-security} needed for the security of our system.
 
 Recall that an AE scheme $\Pi_{\ae}$ consists of algorithms $(\gen, \enc, \dec)$ with syntax defined in \cref{subsec:AE}. 
@@ -25,11 +25,11 @@ Distinguishing Game $\mathbf{Exp}_{\mathsf{IK-CCA}}^{\cA}$
 
 Let $\ct_{\query}$ denote the queries $\cA$ sent to both decryption oracles on line (5).  We define the output of the experiment as $1$ if both $b' = b$ and $\ct \notin \ct_{\query}$, and $0$ otherwise. 
 
-Then we say the key exchange plus symmetric key system $\Pi_{\ae}$ is \textbf{IK-CCA secure} if for any p.p.t with oracle adversary $\cA^O$, we have
+Then we say the AE system $\Pi_{\ae}$ is \textbf{IK-CCA secure} if for any p.p.t with oracle adversary $\cA^O$, we have
 $$\PP(\mathbf{Exp}^{\mathsf{IK-CCA}}_{\cA} = 1) \leq \frac{1}{2} + \negl(\lambda).$$
 \end{definition}
 
-Let $\Pi_{\ae}$ be IK-CCA. We now show that $\Pi_{\ae}$ is Eval-secure. We recall the relevant definitions, where the simulator simply outputs $\Enc(\sk_{0}, 0^{L})$ for $\sk_0 \leftarrow \gen(1^{\lambda})$.
+Assume that $\Pi_{\ae}$ is IK-CCA. We now show that $\Pi_{\ae}$ is Eval-secure. We recall the relevant definitions, where the simulator simply outputs $\Enc(\sk_{0}, 0^{L})$ for $\sk_0 \leftarrow \gen(1^{\lambda})$.
 
 \begin{figure}[ht!]
 \begin{framed}
@@ -58,12 +58,12 @@ Let $\Pi_{\ae}$ be IK-CCA. We now show that $\Pi_{\ae}$ is Eval-secure. We recal
 \end{figure}
 We use a standard hybridizing argument to show that the views of $\cA$ are indistinguishable. 
 \begin{definition}
-We define the Oracle $\widetilde{\Eval_{k, f}}(\sk_i, \cdot)$ as follows. For the first $k$ time it behaves exactly the same as $\Eval_f(\sk_i, \cdot)$. After $k$ calls, it outputs $\Enc(\sk_1, 0^L)$ for $\sk \leftarrow \gen(1^{\lambda})$.
+Define the Oracle $\widetilde{\Eval_{k, f}}(\sk_i, \cdot)$ as follows. For the first $k$ time it behaves exactly the same as $\Eval_f(\sk_i, \cdot)$. After $k$ calls, it outputs $\Enc(\sk_1, 0^L)$ for $\sk \leftarrow \gen(1^{\lambda})$.
 
 For each $k \geq 0$, define $\Hyb_{\Eval, j}$ as the Real World Experiment $\Real_{\Eval}^{\cA}$ with $\Eval_f(\{\sk_i\}, \cdot)$ replaced by $\widetilde{\Eval_{k, f}}(\{\sk_i\}, \Eval, \cdot)$. 
 \end{definition}
 \begin{lemma}
-     Assume $\Pi_{\ae}$ is IK-CCA secure. Then for any $0 \leq k \leq R$, we have 
+    For any $0 \leq k \leq R$, we have 
     $$\Hyb_{\Eval, k + 1} \equiv_c \Hyb_{\Eval, k}.$$
 \end{lemma}
 \begin{proof}
@@ -78,9 +78,9 @@ For each $k \geq 0$, define $\Hyb_{\Eval, j}$ as the Real World Experiment $\Rea
      &= \frac{1}{2} + \frac{1}{2}\PP(D(\Hyb_{\Eval, k + 1}), i_{k + 1} = i^*)  \\
      & \quad - \frac{1}{2} \PP(D(\Hyb_{\Eval, k}), i_{k + 1} = i^*).
     \end{align*}
-    By IK-CCA, there exists a negligible function $\mu(\lambda)$ independent of $j$ such that for any $j$, we have
+    By IK-CCA, there exists a negligible function $\mu(\lambda)$ such that
     $$\PP(\mathbf{Exp}_\mathsf{IK-CCA}^{\cA'} = 1) \leq \frac{1}{2} + \mu(\lambda).$$
-    Substituting back, and summing over all $i^* \in [N]$, we conclude a contradiction
+    Summing over all $i^* \in [N]$, we obtain a contradiction
     $$\PP(D(\Hyb_{\Eval, k + 1})) - \PP(D(\Hyb_{\Eval, k})) \leq \negl(\lambda).$$
 \end{proof}
 Since $\Hyb_{\Eval, 0}$ is identical to $\Ideal_{\Eval}^{\cA}$, and $\Hyb_{\Eval, R}$ is identical to $\Real_{\Eval}^{\cA}$, we conclude that $\Ideal_{\Eval}^{\cA}$ is indistinguishable with $\Real_{\Eval}^{\cA}$. So $\Pi_{\ae}$ is Eval-Secure as desired.
