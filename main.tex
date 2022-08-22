@@ -1,25 +1,44 @@
-\documentclass[sigconf, nonacm, balance=false, natbib=false, screen]{acmart}
-%\documentclass[10pt]{article}
+\documentclass[sigconf, nonacm, balance=false, natbib=false, screen, hidelinks]{acmart}
+
+\title[Formal Security Definition of Anysphere]{Formal Security Definition of Anysphere}
+% recommended practice?
+\author{Shengtong Zhang}
+\orcid{}
+\affiliation{%
+ \institution{Anysphere, Inc.}
+ \city{New York}
+ \country{USA}}
+\email{stzh1555@anysphere.co}
+\author{Arvid Lunnemark}
+\orcid{}
+\affiliation{%
+  \institution{Anysphere, Inc.}
+  \city{New York}
+ \country{USA}}
+\email{arvid@anysphere.co}
+\author{Sualeh Asif}
+\orcid{}
+\affiliation{%
+  \institution{Anysphere, Inc.}
+  \city{New York}
+ \country{USA}}
+\email{sualeh@anysphere.co}
+
+\setshorttitle{Formal Security Definition of Anysphere}
+\setshortauthors{Zhang, Lunnemark, Asif}
+
+
+\def\dateinfo{August 30, 2022}
+\date{\dateinfo}
 
 \input{preamble}
 
-\title{Formal Security Definition of Anysphere}
-
-%\setshortauthors{Arvid Lunnemark, Shengtong Zhang, Sualeh Asif}
-%\setshorttitle{Anysphere: Private Communication in Practice}
-
-\makeatletter
-\patchcmd{\@maketitle}{\begin{center}}{\begin{adjustwidth}{-0.5in}{-0.5in}\begin{center}}{}{}
-\patchcmd{\@maketitle}{\end{center}}{\end{center}\end{adjustwidth}}{}{}
-\makeatother
 
 \begin{document}
 
 \input{abstract}
 
-
 \maketitle
-
 \tableofcontents
 \input{purpose}
 \input{general_definition}
