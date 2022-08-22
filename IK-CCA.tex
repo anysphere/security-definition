@@ -8,7 +8,7 @@ Recall that an AE scheme $\Pi_{\ae}$ consists of algorithms $(\gen, \enc, \dec)$
 \begin{definition}[IK-CCA]
 \label{defn:AE-IK-CCA}
 Consider the following distinguishing experiment, where $N = N(\lambda)$ is polynomial in $\lambda$.
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \begin{framed}
 Distinguishing Game $\mathbf{Exp}_{\mathsf{IK-CCA}}^{\cA}$
 \begin{enumerate}
@@ -31,7 +31,7 @@ $$\PP(\mathbf{Exp}^{\mathsf{IK-CCA}}_{\cA} = 1) \leq \frac{1}{2} + \negl(\lambda
 
 Let $\Pi_{\ae}$ be IK-CCA. We now show that $\Pi_{\ae}$ is Eval-secure. We recall the relevant definitions, where the simulator simply outputs $\Enc(\sk_{0}, 0^{L})$ for $\sk_0 \leftarrow \gen(1^{\lambda})$.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \begin{framed}
 \textbf{Real World Experiment $\Real^{\cA}_{\Eval}$}
 \begin{enumerate}

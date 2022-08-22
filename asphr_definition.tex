@@ -25,15 +25,16 @@ $$\dec(\sk, \enc(\sk, m)) = m.$$
 
 \begin{definition}
 \label{defn:AE-eval-oracle}
-Given a secret key $\sk$, and a polynomial time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$, the \textbf{Eval oracle} $\Eval_{f}(\sk, \sk', \cdot)$ takes as input a set of ciphertexts $\arg_{\ct} = \{\ct_i\}$, and a plaintext argument $\arg_{p}$. It sets 
+Given a secret key $\sk$, and a polynomial time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$, the \textbf{Eval oracle} 
+$$\Eval_{f}(\sk, \sk', \arg_{\ct}, \arg_p) \to \ct'$$ takes as input a set of ciphertexts $\arg_{\ct} = \{\ct_i\}$, and a plaintext argument $\arg_{p}$. It sets 
 $$m_i \leftarrow \dec(\sk', \ct_i)$$ 
-and outputs $\enc(\sk, f(\{m_i\}, \arg_p))$.
+and outputs $\ct' = \enc(\sk, f(\{m_i\}, \arg_p))$.
 \end{definition}
 \begin{definition}
 \label{defn:AE-eval-security}
 Let $N, R$ be polynomial in $\lambda$. Consider the two experiments defined in \cref{expr:AE-real-ideal-world}.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \begin{framed}
 \textbf{Real World Experiment $\Real_{\Eval}^{\cA}$}
 \begin{enumerate}
@@ -68,7 +69,7 @@ We will later show that Eval-Security is implied by an analogy of IK-CCA \cite[D
 \label{defn:AE-unforgability}
 Consider the forging experiment described in \cref{expr:AE-forging}.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \begin{framed}
 \textbf{Forging Experiment}
 \begin{enumerate}
@@ -113,7 +114,7 @@ satisfies $x_i = DB[i]$ with probability $1$.
 \label{defn:PIR-SIM-security}
 Let $R$ be polynomially bounded in $\lambda$. Consider the experiments in \cref{expr:pir-real-ideal-world}. We say the PIR scheme is \textbf{SIM-Secure} if there exists a p.p.t simulator $\Sim$ such that for any stated p.p.t adversary $\cA$, the view of $\cA$ under the real world experiment and the ideal world experiment are computationally indistinguishable. 
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \begin{framed}
 \textbf{Real World Experiment $\Real^{\cA}_{\pir}$}
 \begin{enumerate}
@@ -225,14 +226,18 @@ If $\cI = \trust(\reg)$.
 Phase 2:
 \begin{enumerate}
     \item If $t$ is not divisible by $T_{\trans}$, return $\emptyset$.
-    \item Let $\{\reg_1, \cdots, \reg_k\}$ be the keys of $\frienddb$, where $k\leq B$ by $B$-bounded friends. Construct $S = [\reg_1,\cdots, \reg_k, \reg, \cdots, \reg]$, where we add $B - k$ copies of $\reg = (-1)$, a dummy registration info. Sample $\reg_s, \reg_r$ uniformly and independently at random from $S$. \arvid{this is not what we currently do. maybe we should. we should make a decision on the CF attack here and what is acceptable. i think my favorite idea is leaking a rounded version of the number of friends, or something like that. however, the way the code works now where we pick a random friend among the friends that we have outgoing messages to is quite nice because it means that messages will get delivered much faster (especially once we implement PIR batch retrieval)...}
+    \item Let $\{\reg_1, \cdots, \reg_k\}$ be the keys of $\frienddb$, where $k\leq B$ since we assume $B$-bounded friends. Construct 
+    $$S = [\reg_1, \cdots, \reg_k, \reg, \cdots, \reg],$$ 
+    where we add $B - k$ copies of $\reg = (-1)$, a dummy registration info. Sample $\reg_s, \reg_r$ uniformly and independently at random from $S$. \arvid{this is not what we currently do. maybe we should. we should make a decision on the CF attack here and what is acceptable. i think my favorite idea is leaking a rounded version of the number of friends, or something like that. however, the way the code works now where we pick a random friend among the friends that we have outgoing messages to is quite nice because it means that messages will get delivered much faster (especially once we implement PIR batch retrieval)...}
     \item Let $\msg^{lb}$ be the labeled message with sequence number $\frienddb[\reg_s].\seqs$ in $\outb[\reg_s]$. If $\outb[\reg_s]$ is empty, let $\msg \leftarrow (-1, 0^{L_{\msg}})$.
     \item $\sk_w \leftarrow \frienddb[\reg_s].\sk[1]$. If $\reg_s$ does not exist in $\frienddb$, randomly generate a secret key $\sk_w \leftarrow \Pi_{\ae}.\gen(1^{\lambda}).$
     \item $\seqr \leftarrow \frienddb[\reg_s].\seqr$.
     \item Encrypt Messages with $\sk_w$.
     \begin{itemize}
         \item $\ct_{\msg} \leftarrow \Pi_{\ae}.\enc(\sk_w, \msg^{lb}).$
-        \item $\ct_{\ack} \leftarrow \Pi_{\ae}.\enc(\sk_w, \ACK(\seqr))$. \arvid{should we talk about the ACK db here, and the fact that we always send all ACKs to everyone? maybe we shouldn't do that anymore... it was necessary for prioritization, but if we don't want to do prioritization then maybe we shouldn't do it anymore}
+        \item $\ct_{\ack} \leftarrow \Pi_{\ae}.\enc(\sk_w, \ACK(\seqr))$. 
+        
+        \arvid{should we talk about the ACK db here, and the fact that we always send all ACKs to everyone? maybe we shouldn't do that anymore... it was necessary for prioritization, but if we don't want to do prioritization then maybe we shouldn't do it anymore}
     \end{itemize}
     \item Let $\reg_r = (i_r)$. Formulate a PIR request for index $i_r$. %\arvid{this $r$ is not the same as the $r$ in $\reg_r$? maybe this should be $i_r$ or something}
     \begin{itemize}
@@ -271,7 +276,8 @@ $\mathbf{\Pi_{\asphr}.C.\Serverrpc}(t, \resp)$
     \item Decipher the message.
     \begin{enumerate}
         \item $\msg^{lb} \leftarrow \Pi_{\ae}.\Dec(\sk_{r}, \ct_{\msg})$.
-        \item If $\msg^{lb} = \bot$ or $\msg^{lb}[0]$ is not $\frienddb[\reg_r].\seqr + 1$, skip the next two steps.
+        \item If $\msg^{lb} = \bot$ or $\msg^{lb}[0] \neq \frienddb[\reg_r].\seqr + 1,$
+        skip the next two steps.
         \item Add $1$ to $\frienddb[\reg_r].\seqr$. 
         \item $\msg \leftarrow \msg^{lb}[1]$. Push $\msg$ to $\inb[\reg_r]$.
     \end{enumerate}
