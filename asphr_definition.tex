@@ -36,7 +36,7 @@ Let $N, R$ be polynomial in $\lambda$. Consider the two experiments defined in \
 
 \begin{figure}[ht!]
 \begin{framed}
-\textbf{Real World Experiment $\Real_{\Eval}^{\cA}$}
+\textbf{Real-World Experiment $\Real_{\Eval}^{\cA}$}
 \begin{enumerate}
     \item For $i$ from $1$ to $N$, $\sk_i \leftarrow \gen(1^{\lambda}).$
     \item For $r$ from $1$ to $R$
@@ -46,7 +46,7 @@ Let $N, R$ be polynomial in $\lambda$. Consider the two experiments defined in \
         \item $\cA$ stores $\ct^{0}_r$.
     \end{enumerate}
 \end{enumerate}
-\textbf{Ideal World Experiment $\Ideal_{\Eval}^{\cA, \Sim}$}
+\textbf{Ideal-World Experiment $\Ideal_{\Eval}^{\cA, \Sim}$}
 \begin{enumerate}
     \item For $i$ from $1$ to $N$, $\sk_i \leftarrow \gen(1^{\lambda}).$
     \item For $r$ from $1$ to $R$
@@ -57,11 +57,11 @@ Let $N, R$ be polynomial in $\lambda$. Consider the two experiments defined in \
     \end{enumerate}
 \end{enumerate}
 \end{framed}
-\caption{Real and Ideal World Experiment for AE Scheme}
+\caption{Real- and Ideal-World Experiment for AE Scheme}
 \label{expr:AE-real-ideal-world}
 \end{figure}
 
-Then we say the AE scheme is \textbf{Eval-Secure} if there exists a p.p.t simulator $\Sim$ such that for any polynomial-time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$ and any p.p.t adversary with oracle $\cA^O$, the real world experiment and the ideal world experiment are computationally indistinguishable.
+Then we say the AE scheme is \textbf{Eval-Secure} if there exists a p.p.t simulator $\Sim$ such that for any polynomial-time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$ and any p.p.t adversary with oracle $\cA^O$, the real-world experiment and the ideal-world experiment are computationally indistinguishable.
 \end{definition}
 We will later show that Eval-Security is implied by an analogy of IK-CCA \cite[Definition 1]{BBDP01keyprivate} for symmetric key cryptography. Since the proof is quite lengthy, we delay it to \cref{sec:IND-CCPKA}.
 
@@ -112,11 +112,11 @@ satisfies $x_i = DB[i]$ with probability $1$.
 \end{definition}
 \begin{definition}
 \label{defn:PIR-SIM-security}
-Let $R$ be polynomially bounded in $\lambda$. Consider the experiments in \cref{expr:pir-real-ideal-world}. We say the PIR scheme is \textbf{SIM-Secure} if there exists a p.p.t simulator $\Sim$ such that for any stated p.p.t adversary $\cA$, the view of $\cA$ under the real world experiment and the ideal world experiment are computationally indistinguishable. 
+Let $R$ be polynomially bounded in $\lambda$. Consider the experiments in \cref{expr:pir-real-ideal-world}. We say the PIR scheme is \textbf{SIM-Secure} if there exists a p.p.t simulator $\Sim$ such that for any stated p.p.t adversary $\cA$, the view of $\cA$ under the real-world experiment and the ideal-world experiment are computationally indistinguishable. 
 
 \begin{figure}[ht!]
 \begin{framed}
-\textbf{Real World Experiment $\Real^{\cA}_{\pir}$}
+\textbf{Real-World Experiment $\Real^{\cA}_{\pir}$}
 \begin{enumerate}
     \item for $r$ from $1$ to $R$
     \begin{enumerate}
@@ -125,7 +125,7 @@ Let $R$ be polynomially bounded in $\lambda$. Consider the experiments in \cref{
         \item $\cA$ stores $\ct_r^0$.
     \end{enumerate}
 \end{enumerate}
-\textbf{Ideal World Experiment $\Ideal^{\cA}_{\pir}$}
+\textbf{Ideal-World Experiment $\Ideal^{\cA}_{\pir}$}
 \begin{enumerate}
     \item for $r$ from $1$ to $R$
     \begin{enumerate}
@@ -135,7 +135,7 @@ Let $R$ be polynomially bounded in $\lambda$. Consider the experiments in \cref{
     \end{enumerate}
 \end{enumerate}
 \end{framed}
-\caption{Real and Ideal World Experiment for PIR Scheme}
+\caption{Real- and Ideal-World Experiment for PIR Scheme}
 \label{expr:pir-real-ideal-world}
 \end{figure}
 \end{definition}
@@ -158,8 +158,8 @@ Finally, we deal with the subtlety of the length of messages. Let $L_{\msglb}$ d
 Recall some notations.
 \begin{itemize}
     \item $\lambda$ is the security parameter.
-    \item $N$ is the number of users.
-    \item $T$ is the number of timesteps our protocol is run.
+    \item $N = N(\lambda)$ is the number of users.
+    \item $T = T(\lambda)$ is the number of timesteps our protocol is run.
     \item $L_{\msg}$ is the length of the raw message.
     \item $\Pi_{\ae}$ is an AE scheme satisfying \cref{defn:AE-correctness}, \cref{defn:AE-eval-security} and \cref{defn:AE-unforgability}.
     \item $\Pi_{\pir}$ is a PIR scheme satisfying \cref{defn:PIR-correctness} and \cref{defn:PIR-SIM-security}.

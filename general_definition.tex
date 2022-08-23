@@ -42,7 +42,7 @@ Without loss of generality, we assume each user issues exactly one input per tim
 \label{defn:messaging-registration-info}
 The \textbf{registration information}, denoted $\reg$ in this paper, is the unique identifier of a user.
 \end{definition}
-\textbf{Remark: }Throughout the rest of the paper, we will always use the registration info as the "address" in the messaging system. For example, we will use registration info as the argument in the make-friend and send-message methods. Registration info is ubiquitous in practical messaging systems: in Messenger, it is the Facebook handle. In Signal, it is the phone number. In Anysphere, it is the ``public ID" as defined in \cite[Figure 6]{whitepaper}.
+\textbf{Remark: }Throughout the rest of the paper, we  always use the registration info as the "address" in the messaging system. For example, we  use registration info as the argument in the make-friend and send-message methods. Registration info is ubiquitous in practical messaging systems: in Messenger, it is the Facebook handle. In Signal, it is the phone number. In Anysphere, it is the ``public ID" as defined in \cite[Figure 6]{whitepaper}.
 \begin{definition}
 \label{defn:messaging-scheme}
 A \textbf{Messaging System} consists of the following polynomial time algorithms.
@@ -66,8 +66,7 @@ Server Side Algorithms for the stateful server $S$.
 \end{itemize}
 \end{definition}
 
-
-Now we can describe some desired properties of MPM systems. In the rest of this section, we will look at three properties we wish Anysphere to satisfy: Correctness, Metadata privacy, and Integrity.
+We have mathematically described MPM systems. In the rest of this section, we describe three desired properties of MPM systems: Correctness, Metadata privacy, and Integrity.
 
 \subsection{Correctness}
 \label{subsec:messaging-correctness}
@@ -75,7 +74,7 @@ First, we describe how the server and clients interact when the server behaves h
 
 \begin{definition}  \hfill\\
 \label{defn:messaging-honest-server-experiment}
-The honest server experiment takes the following parameters.
+The \textbf{honest server experiment} takes the following parameters.
 
 \begin{enumerate}
     \item $\lambda$, the security parameter.
@@ -99,7 +98,7 @@ Let $S$ denote the server machine, and let $\{C_i\}_{i \in \cH}$ denote the hone
 
     \item $\{\req_i\}_{i \in [N] - \cH} \leftarrow \cA(\{\req_i\}_{i \in \cH})$.
     
-    \item $\{\resp_i\} \leftarrow S.\Clientrpc(t, \{\req_i\})$.
+    \item $\{\resp_i\}_{i = 1}^N \leftarrow S.\Clientrpc(t, \{\req_i\}_{i = 1}^N)$.
     
     \item For each $i \in \cH$, $C_i.\Serverrpc(t, \resp_i)$.
 
@@ -149,7 +148,7 @@ Since the GUI can query the client at any time, we expect the client's view to b
 \label{defn:messaging-correctness}
  We say a messaging system is \textbf{correct} if for any choice of parameters of the honest server experiment, any $j \in \cH$, and any positive integer $T_0 \leq T$. Let $V_j \leftarrow C_j.\mathsf{GetView}()$ be the view of client $j$ after timestep $T_0$ of the Honest Server Experiment, the messaging system satisfies the following two properties with probability $1 - \negl(\lambda)$.
 
-1) \textbf{Consistent Prefix}: $V$ is identical to the correct view of the client $j$ if a prefix of user inputs have been executed on each client machine. More formally, for any $j \in \cH$, there exists a map $t: \cH \to [T_0]$ such that  $V$ is a correct view of client $j$ with honest users $\reg_{\cH}$ and inputs $\{\cI'_{i, t}\}_{i \in \cH, t \in [T]}$, where we define
+1) \textbf{Consistent Prefix}: $V_j$ is identical to the correct view of the client $j$ if a prefix of user inputs have been executed on each client machine. More formally, for any $j \in \cH$, there exists a map $t: \cH \to [T_0]$ such that $V_j$ is a correct view of client $j$ with honest users $\reg_{\cH}$ and inputs $\{\cI'_{i, t}\}_{i \in \cH, t \in [T]}$, where we define
 $$\cI'_{i, t} = \begin{cases}
 \cI_{i, t}, t \leq t(i) \\
 \emptyset, t > t(i)
@@ -171,7 +170,7 @@ We do not enable the adversary to
 
 2) Break standard cryptography. In \cref{sec:asphr-defn}, we describe standard security requirements on the cryptography primitives we use.
 
-We write our security definitions following the real world-ideal world paradigm used in \cite[Section 2.2]{shi2021non}. On a high level, the real-world experiment is the honest world experiment with an adversarial server running arbitrary code. The ideal world experiment is the real-world experiment with crucial information "redacted". We say the messaging system is secure if the adversary's views under the two experiments are indistinguishable.
+We write our security definitions following the real-world-ideal- world paradigm used in \cite[Section 2.2]{shi2021non}. On a high level, the real-world experiment is the honest world experiment with an adversarial server running arbitrary code. The ideal world experiment is the real-world experiment with crucial information "redacted". We say the messaging system is secure if the adversary's views under the two experiments are indistinguishable.
 
 We first define the real-world experiment.
 
@@ -182,7 +181,7 @@ The real-world experiment uses the parameters $\lambda, N, T, \cH$ in \cref{defn
 
 \begin{figure}[!ht]
 \begin{framed}
-\textbf{Real World Experiment }$\Real_{\msg}^{\cA}(1^{\lambda})$
+\textbf{Real-World Experiment }$\Real_{\msg}^{\cA}(1^{\lambda})$
 \begin{enumerate}
 \item $\cH \leftarrow \cA(1^{\lambda}, N, T)$.
 \item For each $i \in \cH$, $\reg_i \leftarrow C_i.\Register(1^{\lambda}, i, N)$. 
@@ -197,7 +196,7 @@ The real-world experiment uses the parameters $\lambda, N, T, \cH$ in \cref{defn
     \end{enumerate}
 \end{enumerate}
 \end{framed}
-\caption{Real World Experiment for Messaging System}
+\caption{Real-World Experiment for Messaging System}
 \label{expr:messaging-real-world}
 \end{figure}
 
@@ -211,10 +210,12 @@ The formal definition is below.
 \begin{definition}
 \label{defn:messaging-leakage}
 Let $\reg_\cH$ be the registration info of honest clients. Let $\{\cI_{i, t}\}_{i \in \cH, t \in [T]}$ be the input from honest clients. We define the \textbf{Leakage} $\mathsf{Leak}(\{\cI_{i, t}\}, \reg_{\cH})$ as
-$$\Leak(\{\cI_{i, t}\}, \reg_\cH) = \{\cI_{i, t}: (i, t) \in \Leak_f \cup \Leak_m\}$$
+$$\Leak(\{\cI_{i, t}\}, \reg_\cH) = (\Leak_f, \Leak_m)$$
 where
-$$\Leak_f = \{(i, t): \trust(\reg) = \cI_{i, t}, \reg \notin \reg_{\cH}\}.$$
-$$\Leak_m = \{(i, t): \mathsf{SendMessage}(\reg, \msg) = \cI_{i, t}, \reg \notin \reg_{\cH}\}.$$
+$$\Leak_f = \{(i, \reg, t): \trust(\reg) = \cI_{i, t}, \reg \notin \reg_{\cH}\}.$$
+\begin{align*}
+\Leak_m = \{(i, \reg, \msg, t): \send(\reg, \msg) = \cI_{i, t}, \reg \notin \reg_{\cH}\}.    
+\end{align*}
 \end{definition}
 % \arvid{let's use other symbols than $\cF$ and $\cM$ because we use them for the view of a single client already and this is similar but not the same}
 % \stzh{Resolved.}
@@ -223,7 +224,7 @@ $$\Leak_m = \{(i, t): \mathsf{SendMessage}(\reg, \msg) = \cI_{i, t}, \reg \notin
 We use the same parameters and notations as \cref{defn:messaging-real-world-experiment}. Furthermore, let $\Sim$ be a stateful simulator. The ideal-world experiment $\Ideal_{\msg}^{\cA, \Sim}(1^{\lambda})$ is described in \cref{expr:messaging-ideal-world}.
 \begin{figure}[h]
 \begin{framed}
-\textbf{Ideal World Experiment }$\Ideal_{\msg}^{\cA, \Sim}(1^{\lambda})$
+\textbf{Ideal-World Experiment }$\Ideal_{\msg}^{\cA, \Sim}(1^{\lambda})$
 \begin{enumerate}
 \item $\cH \leftarrow \cA(1^{\lambda}, N, T)$.
 \item $\reg_{\cH} \leftarrow \Sim(1^{\lambda}, N, T)$. 
@@ -238,7 +239,7 @@ We use the same parameters and notations as \cref{defn:messaging-real-world-expe
     \end{enumerate}
 \end{enumerate}
 \end{framed}
-\caption{Ideal World Experiment for Messaging System}
+\caption{Ideal-World Experiment for Messaging System}
 \label{expr:messaging-ideal-world}
 \end{figure}
 
@@ -253,12 +254,12 @@ We say a messaging system is \textbf{SIM-metadata secure} if there exists a p.p.
 
 % Arvid's notes because this confused him for several hours.
 % Think of \mathcal{A} as the Distinguisher's right hand! Or, another way of saying it — it is an adversary *against* the Simulator, NOT the adversary that is trying to attack the system in the wild.
-% Suppose X is an NSA spy (i.e., real world adversary). Then, the security definition has shown us that the Simulator is a really really good simulator — even when you try super hard to break it, you cannot. Hence, X's view in the real world will be the same as X's view in a world where everyone else is simulated by the Simulator. This means that X might as well be running in a vacuum, and hence cannot ever learn any information whatsoever.
+% Suppose X is an NSA spy (i.e., real-world adversary). Then, the security definition has shown us that the Simulator is a really really good simulator — even when you try super hard to break it, you cannot. Hence, X's view in the real-world will be the same as X's view in a world where everyone else is simulated by the Simulator. This means that X might as well be running in a vacuum, and hence cannot ever learn any information whatsoever.
 
 The simulator-based definition is a relatively new way of writing security definitions. We include an equivalent security definition for readers more accustomed to indistinguishability-based security definitions.
 \begin{definition}
 \label{defn:messaging-ind-experiment}
-We use the same notations as in \cref{defn:messaging-ideal-world-experiment}. For parameter $b \in \{0, 1\}$, the IND experiment $\Ind_b^{\cA}$ is described in \cref{expr:messaging-IND}.
+We use the same notations as in \cref{defn:messaging-ideal-world-experiment}. For each $b \in \{0, 1\}$, the IND experiment $\Ind_b^{\cA}$ is described in \cref{expr:messaging-IND}.
 
 \begin{figure}[!h]
 \begin{framed}
@@ -268,7 +269,7 @@ We use the same notations as in \cref{defn:messaging-ideal-world-experiment}. Fo
 \item $\{\cI^{0}_{i, 1}\}, \{\cI^{1}_{i, 1}\} \leftarrow \cA(1^{\lambda}, \reg_{\cH})$.
 \item For $t$ from $1$ to $T$:
     \begin{enumerate}
-    \item For each $i \in H$, $\req_i \leftarrow C_i.\Userinput(t, \cI^{b}_{i, t})$.
+    \item For each $i \in \cH$, $\req_i \leftarrow C_i.\Userinput(t, \cI^{b}_{i, t})$.
     
     \item for $b'\in \{0, 1\}$, $\{\resp^{b'}_i\}_{i \in \cH},\{\cI^{b'}_{i, t + 1}\}_{i \in \cH} \leftarrow \cA(1^{\lambda}, \{\req_i\}_{i \in \cH})$.
     
@@ -282,8 +283,8 @@ We use the same notations as in \cref{defn:messaging-ideal-world-experiment}. Fo
 
 We say the adversary $\cA$ is \textbf{admissible} if with probability $1$ we have
 \begin{align*}
-\Leak(\{\cI^{0}_{i, t}\}_{i \in \cH, t \in [T]}, \reg_{\cH}) \\
-= \Leak(\{\cI^{1}_{i, t}\}_{i \in \cH, t \in [T]}, \reg_{\cH}).    
+&\Leak(\{\cI^{0}_{i, t}\}_{i \in \cH, t \in [T]}, \reg_{\cH}) \\
+= &\Leak(\{\cI^{1}_{i, t}\}_{i \in \cH, t \in [T]}, \reg_{\cH}).    
 \end{align*}
 \end{definition}
 \begin{definition}
@@ -291,7 +292,7 @@ We say the adversary $\cA$ is \textbf{admissible} if with probability $1$ we hav
 We say a messaging system is \textbf{IND-metadata secure} if for any $N$ and $T$ polynomially bounded in $\lambda$, and any admissible adversary $\cA$, the IND experiments $\Ind_0^{\cA}$ and $\Ind_1^{\cA}$ are indistinguishable.
 \end{definition}
 
-Using the argument in \cite[Appendix A]{shi2021non}, we can show that IND-metadata security is equivalent to SIM-metadata security.
+The argument in \cite[Appendix A]{shi2021non} shows that IND-metadata security is equivalent to SIM-metadata security.
 
 Finally, we define the notion of integrity. Informally, while a malicious server can DoS users, it shouldn't be able to forge messages  or selectively omit messages between honest users. In other words, the client must guarantee consistent prefixes in our threat model.
 \begin{definition}
@@ -321,7 +322,7 @@ We say that a set of inputs $\{\cI_{i, t}\}_{i \in \cH, t \in [T]}$ satisfy \tex
 $$\{\reg: \exists t, \trust(\reg) = \cI_{i, t}\}$$
 has cardinality at most $B$.
 
-We say a messaging scheme is correct with $B$-bounded friends if in the honest server experiment \cref{expr:messaging-honest-server}, if $\{\cI_{i, t}\}$ satisfy $B$-bounded friends, then the scheme produces the correct views with probability $1 - \negl(\lambda)$.
+We say a messaging scheme is correct with $B$-bounded friends if in the honest server experiment(\cref{expr:messaging-honest-server}), if $\{\cI_{i, t}\}$ satisfy $B$-bounded friends, then the scheme produces the correct views with probability $1 - \negl(\lambda)$.
 
 We say a messaging scheme is SIM-secure with $B$-bounded friends if for any polynomial upper bounds on $N$ and $T$, there exists a p.p.t simulator $\Sim$ such that for any p.p.t adversary $\cA$, the view of $\cA$ is indistinguishable in $\mathsf{Real}^{\cA}(1^{\lambda})$ and $\mathsf{Ideal}^{\cA, \mathsf{\Sim}}(1^{\lambda})$, provided that the input set $\{\cI_{i, t}\}_{i \in \cH, t \in [T]}$ satisfies $B$-bounded friends.
 \end{definition}
