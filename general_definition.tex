@@ -181,7 +181,7 @@ The real-world experiment uses the parameters $\lambda, N, T, \cH$ in \cref{defn
 
 \begin{figure}[!ht]
 \begin{framed}
-\textbf{Real-World Experiment }$\Real_{\msg}^{\cA}(1^{\lambda})$
+\textbf{Real-World Experiment }$\Real_{\msg}^{\cA}$
 \begin{enumerate}
 \item $\cH \leftarrow \cA(1^{\lambda}, N, T)$.
 \item For each $i \in \cH$, $\reg_i \leftarrow C_i.\Register(1^{\lambda}, i, N)$. 
@@ -224,7 +224,7 @@ $$\Leak_f = \{(i, \reg, t): \trust(\reg) = \cI_{i, t}, \reg \notin \reg_{\cH}\}.
 We use the same parameters and notations as \cref{defn:messaging-real-world-experiment}. Furthermore, let $\Sim$ be a stateful simulator. The ideal-world experiment $\Ideal_{\msg}^{\cA, \Sim}(1^{\lambda})$ is described in \cref{expr:messaging-ideal-world}.
 \begin{figure}[h]
 \begin{framed}
-\textbf{Ideal-World Experiment }$\Ideal_{\msg}^{\cA, \Sim}(1^{\lambda})$
+\textbf{Ideal-World Experiment }$\Ideal_{\msg}^{\cA, \Sim}$
 \begin{enumerate}
 \item $\cH \leftarrow \cA(1^{\lambda}, N, T)$.
 \item $\reg_{\cH} \leftarrow \Sim(1^{\lambda}, N, T)$. 
