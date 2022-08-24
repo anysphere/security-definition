@@ -176,7 +176,7 @@ We first define the real-world experiment.
 
 \begin{definition}
 \label{defn:messaging-real-world-experiment}
-The real-world experiment uses the parameters $\lambda, N, T, \cH$ in \cref{defn:messaging-honest-server-experiment}. Let $\cA$ be a stateful p.p.t. adversary. The experiment $\Real_{\msg}^{\cA}(1^{\lambda})$ is described in \cref{expr:messaging-real-world}.
+The real-world experiment uses the parameters $\lambda, N, T, \cH$ in \cref{defn:messaging-honest-server-experiment}. Let $\cA$ be a stateful p.p.t. adversary. The experiment $\Real_{\msg}^{\cA}$ is described in \cref{expr:messaging-real-world}.
 \end{definition}
 
 \begin{figure}[!ht]
@@ -221,8 +221,8 @@ $$\Leak_f = \{(i, \reg, t): \trust(\reg) = \cI_{i, t}, \reg \notin \reg_{\cH}\}.
 % \stzh{Resolved.}
 \begin{definition}
 \label{defn:messaging-ideal-world-experiment}
-We use the same parameters and notations as \cref{defn:messaging-real-world-experiment}. Furthermore, let $\Sim$ be a stateful simulator. The ideal-world experiment $\Ideal_{\msg}^{\cA, \Sim}(1^{\lambda})$ is described in \cref{expr:messaging-ideal-world}.
-\begin{figure}[h]
+We use the same parameters and notations as \cref{defn:messaging-real-world-experiment}. Furthermore, let $\Sim$ be a stateful simulator. The ideal-world experiment $\Ideal_{\msg}^{\cA, \Sim}$ is described in \cref{expr:messaging-ideal-world}.
+\begin{figure}[ht]
 \begin{framed}
 \textbf{Ideal-World Experiment }$\Ideal_{\msg}^{\cA, \Sim}$
 \begin{enumerate}
@@ -249,7 +249,7 @@ Finally, we define metadata security.
 
 \begin{definition}
 \label{defn:messaging-security}
-We say a messaging system is \textbf{SIM-metadata secure} if there exists a p.p.t simulator $\Sim$ such that for any p.p.t adversary $\cA$, the view of $\cA$ is indistinguishable in $\mathsf{Real}_{\msg}^{\cA}(1^{\lambda})$ and $\mathsf{Ideal}^{\cA, \mathsf{\Sim}}_{\msg}(1^{\lambda})$.
+We say a messaging system is \textbf{SIM-metadata secure} if there exists a p.p.t simulator $\Sim$ such that for any p.p.t adversary $\cA$, the view of $\cA$ is indistinguishable in $\mathsf{Real}_{\msg}^{\cA}$ and $\mathsf{Ideal}^{\cA, \mathsf{\Sim}}_{\msg}$.
 \end{definition}
 
 % Arvid's notes because this confused him for several hours.
@@ -324,7 +324,7 @@ has cardinality at most $B$.
 
 We say a messaging scheme is correct with $B$-bounded friends if in the honest server experiment(\cref{expr:messaging-honest-server}), if $\{\cI_{i, t}\}$ satisfy $B$-bounded friends, then the scheme produces the correct views with probability $1 - \negl(\lambda)$.
 
-We say a messaging scheme is SIM-secure with $B$-bounded friends if for any polynomial upper bounds on $N$ and $T$, there exists a p.p.t simulator $\Sim$ such that for any p.p.t adversary $\cA$, the view of $\cA$ is indistinguishable in $\mathsf{Real}^{\cA}(1^{\lambda})$ and $\mathsf{Ideal}^{\cA, \mathsf{\Sim}}(1^{\lambda})$, provided that the input set $\{\cI_{i, t}\}_{i \in \cH, t \in [T]}$ satisfies $B$-bounded friends.
+We say a messaging scheme is SIM-secure with $B$-bounded friends if for any polynomial upper bounds on $N$ and $T$, there exists a p.p.t simulator $\Sim$ such that for any p.p.t adversary $\cA$, the view of $\cA$ is indistinguishable in $\mathsf{Real}^{\cA}$ and $\mathsf{Ideal}^{\cA, \mathsf{\Sim}}$, provided that the input set $\{\cI_{i, t}\}_{i \in \cH, t \in [T]}$ satisfies $B$-bounded friends.
 \end{definition}
 
-\textbf{Remark}: The $B$-bounded friends hypothesis might be too restrictive in practice. We can modify the core protocol to not add dummy registration infos. Under this modification, we achieve the same security for users with no compromised friends. The tradeoff is that users with compromised friends are subject to CF attacks and will potentially leak their number of friends at any given time.
+\textbf{Remark}: The $B$-bounded friends hypothesis might be too restrictive in practice. We can modify the core protocol to not add dummy registration infos below. Under this modification, we achieve the same security for users with no compromised friends. The tradeoff is that users with compromised friends are subject to CF attacks and will potentially leak their number of friends at any given time. 

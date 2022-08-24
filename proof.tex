@@ -175,9 +175,9 @@ Phase 2:
     \item If $t$ is not divisible by $T_{\trans}$, return $\emptyset$.
     \item Let $\{\reg_1, \cdots, \reg_k\}$ be the keys of $\frienddb$, with $k\leq B$. Construct $S = [\reg_1,\cdots, \reg_k, \reg, \cdots, \reg]$, where we add $B - k$ copies of $\reg = (-1)$, a dummy registration info . Sample $\reg_s, \reg_r$ uniformly and independently at random from $S$. 
     \item Let $\msg$ be the (labeled) message with sequence number $\frienddb[\reg_s].\seqs$ in $\outb[\reg_s]$. If $\outb[\reg_s]$ is empty, let $\msg = (-1, 0^{L_{\msg}})$.
-    \item $\sk_w \leftarrow \frienddb[\reg_s].\sk[1]$. If $\reg_s$ does not exist in $\frienddb$, randomly generate a secret key $\sk \leftarrow \Pi_{\ae}.\gen(1^{\lambda}).$
+    \item $\sk_w \leftarrow \frienddb[\reg_s].\sk[1]$. If $\reg_s$ does not exist in $\frienddb$, randomly generate a secret key $\sk_w \leftarrow \Pi_{\ae}.\gen(1^{\lambda}).$
     \item $\seqr \leftarrow \frienddb[\reg_s].\seqr$.
-    \item Encrypt Messages with $\sk$.
+    \item Encrypt Messages with $\sk_w$.
 
     \begin{siderule}
         { 
@@ -292,7 +292,7 @@ Contrary to the first hybrid, $\cA_2$ knows all the key exchange secret keys. Fu
 
 In $\Real_{\pir}^{\cA}$, $\cA_2$ simulates $\Hyb_{1'}$ verbatim, while in $\Ideal_{\pir}^{\cA, \Sim}$, $\cA_2$ simulates $\Hyb_2$ verbatim. Thus, $\cA_2$ just need to output the view of $\cA$ at the end of the simulation, and the same distinguisher $\cD' = \cD$ can distinguish between the views of $\cA_1$ in the real- and ideal-world. This contradicts our assumption that $\Pi_{\pir}$ satisfies \cref{defn:PIR-SIM-security}. Therefore, we conclude that
 $$\Hyb_{1'} \equiv_c \Hyb_2.$$
-Third Hybrid: We add the statements marked Hybrid 3, and run the experiment in \cref{defn:messaging-real-world-experiment}. We call this modified experiment $\Hyb_{3}$. This modification does not change the view of the adversary at all. After the changes in Hybrid 1, 1', and 2, for any $i, j \in \cH$, the contents of $C_i.\frienddb[\reg_j], C_i.\inb[\reg_j], C_i\outb[\reg_j]$ does not affect client $i$ output. (In particular, whether $\reg$ lies in $\frienddb$ or not does not affect the distribution of $\reg_s$ or $\reg_r$). For any $\reg \notin \reg_{\cH}$, Hybrid 3 does not affect updates to $C_i.\frienddb[\reg], C_i.\inb[\reg]$, and $C_i\outb[\reg]$. So we conclude
+Third Hybrid: We add the statements marked Hybrid 3, and run the experiment in \cref{defn:messaging-real-world-experiment}. We call this modified experiment $\Hyb_{3}$. This modification does not change the view of the adversary at all. After the changes in Hybrid 1, 1', and 2, for any $i, j \in \cH$, the contents of $C_i.\frienddb[\reg_j], C_i.\inb[\reg_j], C_i.\outb[\reg_j]$ does not affect client $i$ output. (In particular, whether $\reg_j$ lies in $\frienddb$ or not does not affect the distribution of $\reg_s$ or $\reg_r$). For any $\reg \notin \reg_{\cH}$, Hybrid 3 does not affect updates to $C_i.\frienddb[\reg], C_i.\inb[\reg]$, and $C_i\outb[\reg]$. So we conclude
 $$\Hyb_{2} \equiv_c \Hyb_3.$$
 Finally, we conclude that
 $$\Hyb_0 \equiv_c \Hyb_3$$
