@@ -160,7 +160,7 @@ $$\cI'_{i, t} = \begin{cases}
 \label{subsec:messaging-security-integrity}
 Next, we define security with an active adversary. We first recap our threat model, defined in \cite[Section 2.2]{whitepaper}. We enable the adversary to
 
-1) Control all servers and the entire internet. In the definition below, the adversary read all requests from honest clients, computes any polynomial time function over them, and returns any response to each client. Therefore, the adversary can perform most record-layer attacks considered by the security community, such as eavesdropping, traffic analysis, and active attacks like cut-and-paste, deep packet inspection, and replay attacks \cite{DB1996sslsecurity}.
+1) Control all servers and the entire internet. In the definition below, the adversary read all requests from honest clients, computes any polynomial time function over them, and returns any response to each client. Therefore, the adversary can perform most transport- and application-layer attacks considered by the security community, such as eavesdropping, traffic analysis, and active attacks like cut-and-paste, deep packet inspection, and replay attacks \cite{DB1996sslsecurity}.
 
 2) Control any subset of the users. In the definition below, the adversary can compromise the friends of honest clients and schedule conversations with honest clients. This allows the adversary to launch the CF attacks defined in \cite{angel2018cf} and \cref{sec:security-vulnerable}.
 
@@ -327,4 +327,4 @@ We say a messaging scheme is correct with $B$-bounded friends if in the honest s
 We say a messaging scheme is SIM-secure with $B$-bounded friends if for any polynomial upper bounds on $N$ and $T$, there exists a p.p.t simulator $\Sim$ such that for any p.p.t adversary $\cA$, the view of $\cA$ is indistinguishable in $\mathsf{Real}^{\cA}$ and $\mathsf{Ideal}^{\cA, \mathsf{\Sim}}$, provided that the input set $\{\cI_{i, t}\}_{i \in \cH, t \in [T]}$ satisfies $B$-bounded friends.
 \end{definition}
 
-\textbf{Remark}: The $B$-bounded friends hypothesis might be too restrictive in practice. We can modify the core protocol to not add dummy registration infos below. Under this modification, we achieve the same security for users with no compromised friends. The tradeoff is that users with compromised friends are subject to CF attacks and will potentially leak their number of friends at any given time. 
+\textbf{Remark}: As  Angel et. al. pointed out in \cite{angel2018cf}, the $B$-bounded friends hypothesis is needed to achieve perfect prevention against CF attacks. However, the core protocol described below is very inefficient in practice. As Angel et. al. suggested, we can modify the protocol to remove the $B$-bounded friends hypothesis and make the protocol far more efficient if we are willing to leak a small amount of additional information. Our implementation of Anysphere uses this modification We define a new leakage function and describe Anysphere

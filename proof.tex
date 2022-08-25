@@ -110,13 +110,13 @@ as desired. Analogous, the event $X_{k} - \max(Y_{k - 1}, T_1) > \lambda B^2 T^U
 \subsection{Proof of Security}
 In this section we show that $\Pi_{\asphr}$ satisfies \cref{defn:messaging-security}. 
 
-Let $N'(\lambda) = N(\lambda)^2$ and $R'(\lambda) = 2N'(\lambda)T(\lambda)$. Assume the simulator $\Sim_{\sym}$ satisfy \cref{defn:AE-eval-security} with parameters $(N, R)$ equal to $(N'(\lambda), R'(\lambda))$, and let $\Sim_{\pir}$ be a simulator satisfying \cref{defn:PIR-SIM-security} with parameters $(N, R) = (N(\lambda), R'(\lambda))$. 
+Let $N'(\lambda) = N(\lambda)^2$ and $R'(\lambda) = 2N'(\lambda)T(\lambda)$. Assume the simulator $\Sim_{\ae}$ satisfy \cref{defn:AE-eval-security} with parameters $(N, R)$ equal to $(N'(\lambda), R'(\lambda))$, and let $\Sim_{\pir}$ be a simulator satisfying \cref{defn:PIR-SIM-security} with parameters $(N, R) = (N(\lambda), R'(\lambda))$. 
 
 At step (2), (4.a), and (4.c) of \cref{expr:messaging-ideal-world}, the simulator $\Sim_{\asphr}$ runs modified versions of the client methods in the corresponding steps of \cref{expr:messaging-real-world} for each client $i \in \cH$. Modifications are marked with a siderule. 
 
 For each pair of honest users $i, j \in \cH$, let 
 $$(\sk_{ij, r}, \sk_{ij, w}) = \gensharedsecret(\reg_i, \reg_j)$$ 
-be their shared secret, with $\sk_{ij, r} = \sk_{ji, w}$ being the read key of user $i$ for messages from user $j$.
+be their shared secret. Here $\sk_{ij, r} = \sk_{ji, w}$ denote the read key of user $i$ for messages from user $j$.
 
 %\todo{Hard-coded. Please modify if the $\Pi_{\asphr}$ methods get changed.}
 
@@ -174,8 +174,8 @@ Phase 2:
 \begin{enumerate}
     \item If $t$ is not divisible by $T_{\trans}$, return $\emptyset$.
     \item Let $\{\reg_1, \cdots, \reg_k\}$ be the keys of $\frienddb$, with $k\leq B$. Construct $S = [\reg_1,\cdots, \reg_k, \reg, \cdots, \reg]$, where we add $B - k$ copies of $\reg = (-1)$, a dummy registration info . Sample $\reg_s, \reg_r$ uniformly and independently at random from $S$. 
-    \item Let $\msg$ be the (labeled) message with sequence number $\frienddb[\reg_s].\seqs$ in $\outb[\reg_s]$. If $\outb[\reg_s]$ is empty, let $\msg = (-1, 0^{L_{\msg}})$.
-    \item $\sk_w \leftarrow \frienddb[\reg_s].\sk[1]$. If $\reg_s$ does not exist in $\frienddb$, randomly generate a secret key $\sk_w \leftarrow \Pi_{\ae}.\gen(1^{\lambda}).$
+    \item Let $\msg^{lb}$ be the (labeled) message with sequence number $\frienddb[\reg_s].\seqs$ in $\outb[\reg_s]$. If $\outb[\reg_s]$ is empty, let $\msg^{lb} = (-1, 0^{L_{\msg}})$.
+    \item $\sk_w \leftarrow \frienddb[\reg_s].\sk[1]$. If $\reg_s$ does not exist in $\frienddb$, set $\sk_w \leftarrow \sk_{\dummy}.$
     \item $\seqr \leftarrow \frienddb[\reg_s].\seqr$.
     \item Encrypt Messages with $\sk_w$.
 
@@ -183,10 +183,10 @@ Phase 2:
         { 
         \textbf{Hybrid 1}:
         
-        If $\reg_s \in \reg_\cH$, 
+        If $\reg_s \in \reg_\cH$ or $\reg_s \notin \frienddb$,
         \begin{itemize}
-            \item $\ct_{\msg} \leftarrow \Sim_{\sym}(1^{\lambda}),$
-            \item $\ct_{\ack} \leftarrow \Sim_{\sym}(1^{\lambda}),$
+            \item $\ct_{\msg} \leftarrow \Sim_{\ae}(1^{\lambda}),$
+            \item $\ct_{\ack} \leftarrow \Sim_{\ae}(1^{\lambda}),$
         \end{itemize}
         Else, 
         }
@@ -194,7 +194,7 @@ Phase 2:
     
     
     \begin{itemize}
-        \item $\ct_{\msg} = \Pi_{\ae}.\enc(\sk_w, \msg).$
+        \item $\ct_{\msg} = \Pi_{\ae}.\enc(\sk_w, \msg^{lb}).$
         \item $\ct_{\ack} = \Pi_{\ae}.\enc(\sk_w, \ACK(\seqr))$.
     \end{itemize}
     \item Let $\reg_r = (i_r, \_)$. Formulate a PIR request for index $i_r$. 
@@ -205,7 +205,7 @@ Phase 2:
           
      \textbf{Hybrid 2}:
          
-     If $\reg_r \in \reg_{\cH}$, 
+     If $\reg_r \in \reg_{\cH}$,
     \begin{itemize}
         \item $\ct_{\query} \leftarrow \Sim_{\pir}(1^{\lambda}).$
     \end{itemize}
@@ -260,16 +260,21 @@ First Hybrid: We add the statements marked Hybrid 1 and run the experiment in \c
 
 The adversary $\cA_1^O$ simulates the real-world experiment in \cref{expr:messaging-real-world}. tTe key idea is to choose a powerful function $f: \Sigma^* \times \Sigma^* \to \Sigma^L$. For each pair of honest users $i, j \in \cH$, define $\data_r[\reg_i] = (\frienddb[\reg_i], \inb[\reg_i], \outb[\reg_i])$. $\cA_1$ stores a log of changes to $\data$ \textbf{encrypted using $\sk = \sk_{ij, r}$}. Whenever it wants to access or update these data in the client simulation, it calls $\Eval_f$. We choose $f$ to decrypt the log, recover the plaintext of the fields, do the corresponding simulation, then re-encrypt the outputs and update to the log ($f$ can use $\arg_p$ to determine which line it is on). For such an $f$, $\cA_1^O$ can use $f$ to perfectly simulate client updates on the $\sk$-encrypted $\data[\reg]$. Finally, note that any client outputs computed from $\data$ are encrypted using $\sk_{ij, r}$, so $f$ can also perfectly simulate client outputs. 
 
-With this choice of $f$, we describe $\cA_1^O$. For any $1 \leq i, j \leq N$, denote $\sk_{ij, r} = \sk_{ji, w} = \sk_{i * N + j}$, where $\sk_{*}$ are defined line (1) of \cref{defn:AE-eval-security}. The step numbers below refer to the steps in \cref{defn:messaging-real-world-experiment} unless otherwise indicated. 
+With this choice of $f$, we describe $\cA_1^O$. For any $1 \leq i, j \leq N$, denote $\sk_{ij, r} = \sk_{ji, w} = \sk_{i * N + j}$ and $\sk_{i, \dummy} = \sk_i$, where the$\sk_{*}$ on the right hand side denote the secret keys generated on line (1) of \cref{defn:AE-eval-security}. The step numbers below refer to the steps in \cref{defn:messaging-real-world-experiment} unless otherwise indicated. 
 \begin{itemize}
     \item Simulate step (1), (2), (3), and (4.b) identical to \cref{defn:messaging-real-world-experiment}.
-    \item After step (2), for each pair of $i, j \in \cH$, $\cA_1$ "set"\footnote{In other word, $\cA_1$ simulates the honest users as if $\gensharedsecret(\reg_i, \reg_j) = \sk_{ij}$. $\cA_1$ does not have access to $\sk_{ij}$.} 
-    $$\gensharedsecret(\reg_i, \reg_j) = (\sk_{ij, r}, \sk_{ji, w}).$$ 
+    \item After step (2), for each pair of $i, j \in \cH$, $\cA_1$ "set"\footnote{In other word, $\cA_1$ simulates the honest users as if $\gensharedsecret(\reg_i, \reg_j) = \sk_{ij}$ and $C_i.\sk_{\dummy} = \sk_{i, \dummy}$. $\cA_1$ does not have access to $\sk_{ij}$.} 
+    \begin{align*}
+    \gensharedsecret(\reg_i, \reg_j) &= (\sk_{ij, r}, \sk_{ij, w}), \\
+    C_i.\sk_{\dummy} &= \sk_{i, \dummy}.   
+    \end{align*}
     $\cA_1$ independently generates all other shared secrets using $\Pi_{\ae}.\gen(1^{\lambda}).$
     \item On step (4.a), $\cA_1$ iterates over $i \in \cH$. $\cA_1$ simulates client $i$'s action in $\Pi_{\asphr}.\Userinput$ verbatim until Phase 2 Step (6). In Step (6), $\cA_1$ do casework based on if $\reg_s \in \reg_{\cH}$. 
     \begin{itemize}
-        \item  If $\reg_s \notin \reg_{\cH}$, $\cA_1$ knows the shared secret between $\reg_i$ and $\reg_s$, so $\cA_1$ can simulate this step verbatim.
-        \item  If $\reg_s \in \reg_{\cH}$, assume $\reg_s = \reg_j$ where $j \in \cH$. $\cA_1$ sets $(\ct, \arg_p)$ so that $\Eval_f(\sk_{ij}, \ct, \arg_p)$ can simulate the original step (6) to compute $\ct_{\msg}$, outputs $(i, j, \ct, \arg_p)$, then moves to line (4.b) in \cref{defn:AE-eval-security}. $\cA_1$ sets $\ct_{\msg} = \ct^b_r$ to be the output of line (4.b). $\cA_1$ repeats this for $\ct_{\ack}$.
+        \item  If $\reg_s \notin \reg_{\cH}$ and $\reg_s \in \frienddb$, $\cA_1$ knows the shared secrets $\sk_r$ and $\sk_w$ between $\reg_i$ and $\reg_s$, so $\cA_1$ can simulate this step verbatim.
+        \item  Otherwise, let $(k, k') = (j * N + i, i * N + j)$ if $\reg_s = \reg_j$ where $j \in \cH$, else let $(k, k') = (i, i)$. $\cA_1$ sets $(\arg_\ct, \arg_p)$ so that 
+        $$\Eval_f(\sk_k, \sk_{k'}, \arg_\ct, \arg_p)$$ 
+        simulates the original step (6) to compute $\ct_{\msg}$, outputs $(k, k', \arg_\ct, \arg_p)$, then moves to line (4.b) in \cref{defn:AE-eval-security}. $\cA_1$ sets $\ct_{\msg} = \ct^b_r$ to be the output of line (4.b). $\cA_1$ repeats this for $\ct_{\ack}$.
     \end{itemize}
    
     \item On step (4.c), $\cA_1$ simulates client action $\Pi_{\asphr}.\Serverrpc$ using $\Eval_f$.
