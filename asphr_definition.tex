@@ -1,12 +1,12 @@
-\section{Definition of Core Protocol}
+\section{A Secure MPM protocol}
 \label{sec:asphr-defn}
 In this section, we formally define the core protocol of a messaging system satisfying \cref{defn:messaging-security} under the $B$-bounded friend hypothesis. Our protocol closely resembles the Anysphere core protocol described in our whitepaper \cite{whitepaper}, modified to achieve full prevention against CF attacks.
 \subsection{Cryptographic Primitives}
-Anysphere relies on two cryptographic primitives: an authenticated encryption(AE) system, and a PIR scheme. We outline formal simulator-based security definitions of the two. 
+Anysphere relies on two cryptographic primitives: an authenticated encryption (AE) system, and a PIR scheme. We outline formal simulator-based security definitions of the two.
 
 \subsubsection{Authenticated Encryption Scheme}
 \label{subsec:AE}
-Our authenticated encryption(AE) scheme $\Pi_{\ae}$ consists of three efficient algorithms 
+Our authenticated encryption (AE) scheme $\Pi_{\ae}$ consists of three randomized efficient algorithms 
 $$(\gen, \enc, \dec)$$
 with specifications
 \begin{itemize}
@@ -18,21 +18,21 @@ We require the scheme to be correct and EUF-CMA unforgeable. We also require a v
 
 \begin{definition}
 \label{defn:AE-correctness}
-Let $\sk \leftarrow \gen(1^{\lambda})$. We say our AE scheme is \textbf{correct} if for any plaintext $m$ of length $L_{\ae}$, we have
-$$\dec(\sk, \enc(\sk, m)) = m.$$
+Let $\sk \leftarrow \gen(1^{\lambda})$. We say that our AE scheme is \textbf{correct} if for any plaintext $m$ of length $L_{\ae}$, we have
+$$\dec(\sk, \enc(\sk, m)) = m$$
+with probability 1.
 \end{definition}
-\textbf{Remark}: In our implementation, we take $L_{\ae} \approx 1 \mathsf{KB}$.
 
 \begin{definition}
 \label{defn:AE-eval-oracle}
-Given a secret key $\sk$, and a polynomial time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$, the \textbf{Eval oracle} 
+Given a secret key $\sk$, and a polynomial-time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$, the \textbf{Eval oracle} 
 $$\Eval_{f}(\sk, \sk', \arg_{\ct}, \arg_p) \to \ct'$$ takes as input a set of ciphertexts $\arg_{\ct} = \{\ct_i\}$, and a plaintext argument $\arg_{p}$. It sets 
 $$m_i \leftarrow \dec(\sk', \ct_i)$$ 
 and outputs $\ct' = \enc(\sk, f(\{m_i\}, \arg_p))$.
 \end{definition}
 \begin{definition}
 \label{defn:AE-eval-security}
-Let $N, R$ be polynomial in $\lambda$. Consider the two experiments defined in \cref{expr:AE-real-ideal-world}.
+Let $N$ and $R$ be polynomial in $\lambda$. Consider the two experiments defined in \cref{expr:AE-real-ideal-world}.
 
 \begin{figure}[ht!]
 \begin{framed}
@@ -46,6 +46,7 @@ Let $N, R$ be polynomial in $\lambda$. Consider the two experiments defined in \
         \item $\cA$ stores $\ct^{0}_r$.
     \end{enumerate}
 \end{enumerate}
+\vspace{0.2cm}
 \textbf{Ideal-World Experiment $\Ideal_{\Eval}^{\cA, \Sim}$}
 \begin{enumerate}
     \item For $i$ from $1$ to $N$, $\sk_i \leftarrow \gen(1^{\lambda}).$
@@ -57,13 +58,13 @@ Let $N, R$ be polynomial in $\lambda$. Consider the two experiments defined in \
     \end{enumerate}
 \end{enumerate}
 \end{framed}
-\caption{Real- and Ideal-World Experiment for AE Scheme}
+\caption{Real- and ideal-world experiments for authenticated encryption (AE).}
 \label{expr:AE-real-ideal-world}
 \end{figure}
 
-Then we say the AE scheme is \textbf{Eval-Secure} if there exists a p.p.t simulator $\Sim$ such that for any polynomial-time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$ and any p.p.t adversary with oracle $\cA^O$, the real-world experiment and the ideal-world experiment are computationally indistinguishable.
+Then we say the AE scheme is \textbf{eval-secure} if there exists a p.p.t. simulator $\Sim$ such that for any polynomial-time computable function $f: \Sigma^* \times \Sigma^* \to \Sigma^{L_{\ae}}$ and any p.p.t. adversary with oracle $\cA^O$, the real-world experiment and the ideal-world experiment are computationally indistinguishable.
 \end{definition}
-We will later show that Eval-Security is implied by an analogy of IK-CCA \cite[Definition 1]{BBDP01keyprivate} for symmetric key cryptography. Since the proof is quite lengthy, we delay it to \cref{sec:IND-CCPKA}.
+We will later show that eval-security is implied by an analogy of IK-CCA \cite[Definition 1]{BBDP01keyprivate} for symmetric-key cryptography. Since the proof is quite lengthy, we delay it to \cref{sec:IND-CCPKA}.
 
 \begin{definition}
 \label{defn:AE-unforgability}
@@ -77,7 +78,7 @@ Consider the forging experiment described in \cref{expr:AE-forging}.
     \item $\ct \leftarrow \cA^{\enc(\sk, \cdot), \dec(\sk, \cdot)}(1^{\lambda}).$
 \end{enumerate}
 \end{framed}
-\caption{Forging Experiment for AE Scheme}
+\caption{Forging experiment for authenticated encryption (AE).}
 \label{expr:AE-forging}
 \end{figure}
 
@@ -86,23 +87,24 @@ $$\PP(\dec(\sk, \ct) \neq \bot \land \ct \notin \ct_{\query}) = \negl(\lambda).$
 \end{definition}
 
 \subsubsection{Symmetric Key Distribution}
-In our system, each pair of users shares two secret keys, used to encrypt two directions of traffic. For two users identified by registration info $\reg_0$ and $\reg_1$, user $\reg_0$ decrypts messages from $\reg_1$ using their \textbf{read key} $\sk_r$, and encrypts messages to $\reg_1$ using their \textbf{write key} $\sk_w$. Thus, $\reg_0$'s read key is $\reg_1$'s write key, and vice versa.
+\label{subsec:key-distribution}
+In our system, each pair of users shares two secret keys, one for encrypting each direction of traffic. For two users identified by registration info $\reg_0$ and $\reg_1$, user $\reg_0$ decrypts messages from $\reg_1$ using their \textbf{read key} $\sk_r$, and encrypts messages to $\reg_1$ using their \textbf{write key} $\sk_w$. Thus, $\reg_0$'s read key is $\reg_1$'s write key, and vice versa.
 
 Previous MPM systems like Pung and Addra assume each pair of users has a shared secret distributed in advance.  In this paper, we assume these keys are independently generated by a trusted third party.  For users identified by registration info $\reg_0$ and $\reg_1$, the trusted third party delivers their shared secret keys $(\sk_r, \sk_w)$ to user $\reg_i$ when $\gensharedsecret(\reg_i, \reg_{1 - i})$ is called. The adversary does not have access to the shared secret between trusted users.
 
 In \cite[Section 4]{whitepaper}, we describe separate trust establishment protocols to replace the trusted third party without compromising metadata security. 
 \subsubsection{PIR Scheme}
 \label{subsec:PIR}
-Like previous MPM systems, Anysphere relies on a Private Information Retrieval(PIR) scheme $\Pi_{\pir}$. A PIR scheme supports three efficient algorithms
+Like previous MPM systems, Anysphere relies on a private information retrieval (PIR) scheme $\Pi_{\pir}$. A PIR scheme supports three efficient algorithms
 \begin{itemize}
     \item $\query(1^{\lambda}, i) \to (\ct, \sk)$.
     \item $\answer^{\DB}(1^{\lambda}, \ct) \to a$.
     \item $\dec(1^{\lambda}, \sk, a) \to x_i$.
 \end{itemize}
-where $\DB$ is a length $N$ database with entries of length $L_{\pir}$, and $N$ is a parameter bounded by some polynomial $N(\lambda)$. It should satisfy the following standard correctness and security definitions \cite{kushilevitz1997replication}.
+where $\DB$ is a database with $N$ entries of length $L_{\pir}$, and $N$ is a parameter bounded by some polynomial $N(\lambda)$. It should satisfy the following standard correctness and security definitions \cite{kushilevitz1997replication}.
 \begin{definition}
 \label{defn:PIR-correctness}
-We say the PIR scheme is \textbf{correct} if for any database $\DB$ of length $N$ with entries of length $L_{\pir}$, the experiment
+We say that the PIR scheme is \textbf{correct} if for any database $\DB$ with $N$ entries of length $L_{\pir}$, the experiment
 \begin{enumerate}
     \item $(\ct, \sk) \leftarrow \query(1^{\lambda}, i)$.
     \item $a \leftarrow \answer^{\DB}(1^{\lambda}, \ct)$.
@@ -112,7 +114,7 @@ satisfies $x_i = DB[i]$ with probability $1$.
 \end{definition}
 \begin{definition}
 \label{defn:PIR-SIM-security}
-Let $R$ be polynomially bounded in $\lambda$. Consider the experiments in \cref{expr:pir-real-ideal-world}. We say the PIR scheme is \textbf{SIM-Secure} if there exists a p.p.t simulator $\Sim$ such that for any stated p.p.t adversary $\cA$, the view of $\cA$ under the real-world experiment and the ideal-world experiment are computationally indistinguishable. 
+Let $R$ be polynomially bounded in $\lambda$. Consider the experiments in \cref{expr:pir-real-ideal-world}. We say the PIR scheme is \textbf{SIM-secure} if there exists a p.p.t simulator $\Sim$ such that for any stateful p.p.t. adversary $\cA$, the view of $\cA$ under the real-world experiment and the ideal-world experiment are computationally indistinguishable. 
 
 \begin{figure}[ht!]
 \begin{framed}
@@ -125,6 +127,7 @@ Let $R$ be polynomially bounded in $\lambda$. Consider the experiments in \cref{
         \item $\cA$ stores $\ct_r^0$.
     \end{enumerate}
 \end{enumerate}
+\vspace{0.2cm}
 \textbf{Ideal-World Experiment $\Ideal^{\cA}_{\pir}$}
 \begin{enumerate}
     \item for $r$ from $1$ to $R$
@@ -135,22 +138,24 @@ Let $R$ be polynomially bounded in $\lambda$. Consider the experiments in \cref{
     \end{enumerate}
 \end{enumerate}
 \end{framed}
-\caption{Real- and Ideal-World Experiment for PIR Scheme}
+\caption{Real- and ideal-world experiments for private information retrieval (PIR).}
 \label{expr:pir-real-ideal-world}
 \end{figure}
 \end{definition}
-For our implementation, we use libsodium's key exchange functionality as the $\gen$ and $\KX$ functions, and libsodium's secret key AEAD for the $\enc$ and $\dec$ functions \cite{libsodium}. We use Addra's FastPIR as the PIR protocol. The definition, correctness, and security proof of FastPIR can be found in \cite[Section 4]{ahmad2021addra} and in \cite{angel2018thesis} with more detail.
+For our implementation, we use Libsodium's key exchange functionality to implement the $\gensharedsecret()$ functions as described in \cite[Section 4]{whitepaper}, and Libsodium's secret key AEAD for the $\enc$ and $\dec$ functions \cite{libsodium}. We use Addra's FastPIR as the PIR protocol. The definition, correctness, and security proof of FastPIR can be found in \cite[Section 4]{ahmad2021addra} and in \cite{angel2018thesis} with more detail.
 
 Throughout the rest of the document, we denote the AE scheme $\Pi_{\ae}$ and the PIR scheme $\Pi_{\pir}$.
 \subsection{Messages, Sequence numbers, ACKs}
 \label{subsec:ACK}
-This section describes how Anysphere adopts TCP's Acknowledgement system to offer integrity (\cref{defn:messaging-integrity}).
+This section describes how Anysphere adopts TCP's acknowledgement system to satisfy integrity (\cref{defn:messaging-integrity}).
 
 Each client $i$ labels all outgoing messages to another client $j$ with a positive integer called the sequence number. The client transmits the labeled message\footnote{Called chunk in the implementation.} $\msg^{lb} = (k, \msg)$, where $k$ is the sequence number and $\msg$ is the actual message. 
 
-Critical to both consistent prefix and eventual consistency are the ACK messages. An ACK message denoted $\ACK(k)$ encodes a single integer $k$.\footnote{In our implementation, the ACK message is slightly more complicated to take chunking into account.} It means ``I have read all messages up to sequence number $k$ from you". As we will soon define rigorously, user $i$ broadcasts the message with sequence number $k$ until user $j$ sends $\ACK(k)$, in which case they begin broadcasting the message with sequence number $k + 1$. We ensure ACK messages are distinct from labeled messages generated from user input.\footnote{In our implementation, we encode ACKs and labeled messages with different protobuf structs.}
+Critical to both consistent prefix and eventual consistency are the ACK messages. An ACK message denoted $\ACK(k)$ encodes a single integer $k$.\footnote{In our implementation, the ACK message is slightly more complicated to take chunking into account.} It means ``I have read all messages up to sequence number $k$ from you''. As we will soon define rigorously, user $i$ broadcasts the message with sequence number $k$ until user $j$ sends $\ACK(k)$, in which case they begin broadcasting the message with sequence number $k + 1$. We ensure ACK messages are distinct from labeled messages generated from user input.\footnote{In our implementation, we encode ACKs and labeled messages with different protobuf structs.}
 
 Finally, we deal with the subtlety of the length of messages. Let $L_{\msglb}$ denote the length of a labeled message $\msg^{lb}$, and let $L_{\ct}$ be the length of a ciphertext generated by encoding $\msg^{lb}$ with $\Pi_{\ae}.\enc$. While the input messages have length $L_{\msg}$, the messages the client sent to the server have length $L_{\ct}$. We set parameter $L_{\ae} = L_{\msglb}$ in the AE scheme, and $L_{\pir} = L_{\ct}$ in the PIR scheme.
+
+\textbf{Remark}: To support $T(\lambda)$ rounds of messages between each pair of users, we need to reserve $\log T(\lambda)$ bits for the label. Therefore, $L_{\ae}$ and $L_{\pir}$ depend linearly on $\log \lambda$.
 
 \subsection{The Core Protocol}
 \label{subsec:core-protocol}
@@ -165,7 +170,7 @@ Recall some notations.
     \item $\Pi_{\ae}$ is an AE scheme satisfying \cref{defn:AE-correctness}, \cref{defn:AE-eval-security} and \cref{defn:AE-unforgability}.
     \item $\Pi_{\pir}$ is a PIR scheme satisfying \cref{defn:PIR-correctness} and \cref{defn:PIR-SIM-security}.
 \end{itemize}
-We now formally define core protocol. We assume the $B$-bounded friends scenario in \cref{defn:messaging-security-weaker}.
+We now define the core protocol. We assume the $B$-bounded friends scenario in \cref{defn:messaging-security-weaker}.
 \begin{definition}
 \label{defn:asphr-code}
 The \textbf{$B$-bounded Anysphere messaging system} $\Pi_{\asphr}$ implements the method signatures in \cref{defn:messaging-scheme} with the pseudocode below. In each method, the caller stores all inputs for future use.
@@ -176,18 +181,17 @@ $\mathbf{\Pi_{\asphr}.C.\mathsf{Register}}(1^{\lambda}, i, N)$
 \hrule
 \vspace{5pt}
 \begin{enumerate}
-    \item Initialize empty map $\frienddb$. The map takes registration info $\reg$ as keys and the following fields as values.    \footnote{These fields are currently implicit. They are made explicit here for simplicity}
+    \item Initialize empty map $\frienddb$ (database of friends). The map takes registration info $\reg$ as keys and the following fields as values.\footnote{These fields are currently implicit. They are made explicit here for simplicity}
     \begin{itemize}
-        \item $\mathsf{sk}$, the secret keys.
+        \item $\mathsf{sk}$, the secret keys shared with the friend identified by $\reg$.
         \item $\seqs$, the sequence number of the current message being broadcasted to the friend identified by $\reg$.
         \item $\seqe$, the largest sequence number ever assigned to messages to the friend identified by $\reg$.
-        \item $\seqr$, the largest sequence number among messages received from the friend identified by $\reg$.
+        \item $\seqr$, the largest sequence number such that the client has received all messages with sequence number in $1,\cdots,\seqr$ from the friend.
     \end{itemize}
 
-    %\arvid{a bit confused between seqend and seqstart...}
-    \item Initialize empty maps $\inb, \outb$. The maps take registration info as keys and arrays of messages as values.\footnote{They are named Friend, Inbox, Outbox in our code. Our code is slightly more complicated to support features like sending to multiple friends and chunking.}
-    \item Set a transmission schedule $T_{\trans}$. The user can customize this parameter. We assume $T_{\trans}$ is upper bounded by a constant $T_{\trans}^U$.
-    \item Initialize a "dummy" key $\sk_{\dummy} \leftarrow \Pi_{\ae}.\gen(1^{\lambda})$.
+    \item Initialize empty maps $\inb$ and $\outb$. The maps take registration info $\reg$ as keys and arrays of messages as values.\footnote{They are named Friend, Inbox, Outbox in our code. Our code is slightly more complicated to support features like sending to multiple friends and chunking.}
+    \item Set a transmission schedule $T_{\trans}$ (the time between messages sent over the network to the server). The user can customize this parameter. We assume $T_{\trans}$ is upper bounded by a constant $T_{\trans}^U$.
+    \item Initialize a ``dummy'' key $\sk_{\dummy} \leftarrow \Pi_{\ae}.\gen(1^{\lambda})$.
     \item Return $\reg = (i)$.
 \end{enumerate}
 \vspace{10pt}
@@ -204,7 +208,7 @@ $\mathbf{\Pi_{\asphr}.C.\Userinput}(t, \cI)$
 \vspace{5pt}
 This method runs in two phases. Phase 1 handles the user input $\cI$, and phase 2 formulates the request to the server.
 
-Phase 1: 
+\textit{Phase 1.}
 
 If $\cI = \emptyset$, do nothing. 
 
@@ -212,7 +216,7 @@ If $\cI = \send(\reg, \msg)$,
 
 \begin{enumerate}
     \item Check that $\reg$ is in $\frienddb$. If not, skip to Phase 2.
-    \item If $\reg$ is the registration of $C_i$ itself, append $\msg$ to $\inb[\reg]$, and skip to Phase 2. \footnote{Skipping this step breaks consistent prefix.}
+    \item If $\reg$ is the registration of $C_i$ itself, append $\msg$ to $\inb[\reg]$, and skip to Phase 2.\footnote{Skipping this step breaks consistent prefix.}
     \item Add $1$ to $\frienddb[\reg].\seqe$. 
     \item Push $\msg^{lb} = (\frienddb[\reg].\seqe, \msg)$ to $\outb[\reg]$.
 \end{enumerate}
@@ -224,16 +228,15 @@ If $\cI = \trust(\reg)$.
     \item $\frienddb[\reg] \leftarrow \{\sk: (\sk_r, \sk_w),  \seqs: 1, \seqe: 0, \\ \seqr: 0\}$.
 \end{enumerate}
 
-Phase 2:
+\textit{Phase 2.}
 \begin{enumerate}
     \item If $t$ is not divisible by $T_{\trans}$, return $\emptyset$.
     \item Let $\{\reg_1, \cdots, \reg_k\}$ be the keys of $\frienddb$, where $k\leq B$ since we assume $B$-bounded friends. Construct 
     $$S = [\reg_1, \cdots, \reg_k, \reg, \cdots, \reg],$$ 
-    where we add $B - k$ copies of $\reg = (-1)$, a dummy registration info. Sample $\reg_s, \reg_r$ uniformly and independently at random from $S$. \footnote{This step is inefficient. We will change this step in \cref{sec:actual-asphr-protocol}.}
-    %\arvid{this is not what we currently do. maybe we should. we should make a decision on the CF attack here and what is acceptable. i think my favorite idea is leaking a rounded version of the number of friends, or something like that. however, the way the code works now where we pick a random friend among the friends that we have outgoing messages to is quite nice because it means that messages will get delivered much faster (especially once we implement PIR batch retrieval)...}
+    where we add $B - k$ copies of $\reg = (-1)$, a dummy registration info. Sample $\reg_s, \reg_r$ uniformly and independently at random from $S$.\footnote{This step is inefficient. We will change this step in \cref{sec:actual-asphr-protocol}.}
     \item Let $\msg^{lb}$ be the labeled message with sequence number $\frienddb[\reg_s].\seqs$ in $\outb[\reg_s]$. If $\outb[\reg_s]$ is empty, let $\msg \leftarrow (-1, 0^{L_{\msg}})$.
-    \item $\sk_w \leftarrow \frienddb[\reg_s].\sk[1]$. If $\reg_s$ does not exist in $\frienddb$, set $\sk_w \leftarrow \sk_{\dummy}.$
-    \item $\seqr \leftarrow \frienddb[\reg_s].\seqr$.
+    \item $\sk_w \leftarrow \frienddb[\reg_s].\sk[1]$. If $\reg_s = \reg_0$ or does not exist in $\frienddb$, set $\sk_w \leftarrow \sk_{\dummy}.$
+    \item $\seqr \leftarrow \frienddb[\reg_s].\seqr$. If $\reg_s = \reg_0$ or does not exist in $\frienddb$, set $\seqr \leftarrow -1.$
     \item Encrypt Messages with $\sk_w$.
     \begin{itemize}
         \item $\ct_{\msg} \leftarrow \Pi_{\ae}.\enc(\sk_w, \msg^{lb}).$

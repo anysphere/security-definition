@@ -1,0 +1,13 @@
+\section{Conclusion and Open Questions}
+Our paper is an attempt to rigorously justify the security of a real-world metadata-private messaging system. The proof can convince users that our messaging service satisfies the security properties we promise, as well as help us find and fix existing security vulnerabilities in our implementation. 
+
+Nevertheless, many open problems remain unexplored in this paper. Below, we give a few examples.
+\begin{itemize}
+    \item In \cref{subsec:key-distribution}, we assume that pairs of honest users can obtain pre-distributed symmetric keys from a trusted third party. We believe that the key exchange protocols proposed in \cite{whitepaper} can replace the third party, but we have no rigorous proof of this property. Is it possible to develop a theory similar to the CK model \cite{CK2001keyexchange} that addresses the metadata security of key exchange protocols?
+    
+    \item To prevent CF attacks, the core protocol described in \cref{subsec:core-protocol} is very inefficient in practice. In \cref{sec:actual-asphr-protocol}, we describe a method we call prioritization that speeds up the core protocol in exchange for some limited metadata leakage. Can we find more efficient protocols that defend against CF attacks fully?
+    
+    \item Is it possible to integrate PIR protocols into the universal composability framework \cite{canetti2020uc}? This would greatly simplify the security proofs of future real-world MPM systems, but we are unaware of any attempt at this.
+    
+    \item Is it possible to formalize the proof using automated proof assistants, such as Coq or Lean?
+\end{itemize}

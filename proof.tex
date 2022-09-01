@@ -1,6 +1,6 @@
 \section{Proofs}
 \label{sec:proofs}
-In this section, we prove that our messaging scheme satisfies \cref{defn:messaging-correctness}, \cref{defn:messaging-security}, and \cref{defn:messaging-integrity} under the $B$-bounded friend scenario. These definitions establish correctness, security, and integrity, respectively.
+In this section, we prove that under the $B$-bounded friends assumption, our messaging system $\Pi_{\asphr}$ satisfies correctness (\cref{defn:messaging-correctness}), metadata security (\cref{defn:messaging-security}), and integrity (\cref{defn:messaging-integrity}).
 \subsection{Proof of Correctness and Integrity}
 We first show that $\Pi_{\asphr}$ satisfies both \cref{defn:messaging-correctness} and \cref{defn:messaging-integrity}.
 
@@ -12,16 +12,16 @@ We introduce some notations for convenience. Define
 \end{align*}
 Let $\msg_{ij}(\ell)$ be the $\ell$-th message in $\MSGS(t_0, i, j)$ sorted by timestep $t$. Let $\msg_{ij}^{lb}(\ell) = (\ell, \msg_{ij}(\ell)).$
 
-\textbf{Consistent Prefix}: We show that $\Pi_{\asphr}$ satisfies \cref{defn:messaging-integrity}, and the consistent prefix property in \cref{defn:messaging-correctness}.
+\subsubsection{Consistent prefix} We show that $\Pi_{\asphr}$ satisfies Definition \ref{defn:messaging-integrity}, and the consistent prefix property in \cref{defn:messaging-correctness}.
 \begin{lemma}
 \label{lem:messaging-correctness-main}
 Consider the real-world experiment in \cref{expr:messaging-real-world}. Then with probability $1 - \negl(\lambda)$, for any pair of honest users $i \neq j \in \cH$ and any $t \leq T$, the property below holds.
 
 \textbf{Property: }One of the following holds at the end of timestep $t$.
 
-1) $\reg_j \notin C_i.\frienddb, C_i.\outb[\reg_j] = C_j.\inb[\reg_i] = \emptyset$.
+(1) $\reg_j \notin C_i.\frienddb, C_i.\outb[\reg_j] = C_j.\inb[\reg_i] = \emptyset$.
 
-2) $\reg_j \in C_i.\frienddb$. Then  for any $\ell$, $\msg_{ij}(\ell)$ is labeled with sequence number $\ell$. Furthermore, denote
+(2) $\reg_j \in C_i.\frienddb$. Then  for any $\ell$, $\msg_{ij}(\ell)$ is labeled with sequence number $\ell$. Furthermore, denote
 \begin{align*}
 S_t &= C_i.\frienddb[\reg_j].\seqs, \\
 E_t &= C_i.\frienddb[\reg_j].\seqe, \\
@@ -33,17 +33,17 @@ $$C_i.\outb[\reg_j] = \{\msg^{lb}_{ij}(S_t), \cdots, \msg^{lb}_{ij}(E_t)\},$$
 $$C_j.\inb[\reg_i] = \{\msg_{ij}(1), \cdots, \msg_{ij}(R_t)\}.$$
 \end{lemma}
 \begin{proof}
-When $t = 0$, 1) is satisfied since $C_i.\frienddb$ is initialized as empty. We now show if these properties hold for all timesteps before $t$, then they will hold at the end of timestep $t$ with probability $1 - \negl(\lambda)$.
+When $t = 0$, (1) is satisfied since $C_i.\frienddb$ is initialized as empty. We now show if these properties hold for all timesteps before $t$, then they will hold at the end of timestep $t$ with probability $1 - \negl(\lambda)$.
 
-The relevant variables are only modified in Phase 1 of $C_i.\Userinput$, in $C_i.\Serverrpc$ and in $C_j.\Serverrpc$. We show that the lemma is satisfied after each method (no matter which order they execute).
+The relevant variables are only modified in Phase 1 of $C_i.\Userinput$, in $C_i.\Serverrpc$ and in $C_j.\Serverrpc$. We show that the lemma is satisfied after each method (no matter in which order they execute).
 
 Phase 1 of $C_i.\Userinput$
 \hrule
-If 1) holds before timestep $t$ starts, then unless 
+If (1) holds before timestep $t$ starts, then unless 
 $$\cI = \trust(\reg_j),$$
-none of the variables are changed. Otherwise, we have $S_t = 1, E_t = R_t = 0$, and both $C_i.\outb[\reg_j] = C_j.\inb[\reg_i] = \emptyset$, which satisfies 2).
+none of the variables are changed. Otherwise, we have $S_t = 1, E_t = R_t = 0$, and both $C_i.\outb[\reg_j] = C_j.\inb[\reg_i] = \emptyset$, which satisfies (2).
 
-If 2) holds before timestep $t$ starts, then unless $\cI = \send(\reg_j, \msg)$ none of the variable are changed. Otherwise, $E_t = E_{t - 1} + 1$. We can check that
+If (2) holds before timestep $t$ starts, then unless $\cI = \send(\reg_j, \msg)$ none of the variables are changed. Otherwise, $E_t = E_{t - 1} + 1$. We can check that
 $$\MSGS(t, i, j) = \MSGS(t - 1, i, j) + (t, \msg).$$
 Thus we have
 $$\abs{\MSGS(t, i, j)} = \abs{\MSGS(t - 1, i, j)} + 1 = E_t.$$
@@ -54,11 +54,11 @@ $C_i.\Serverrpc$
 \hrule
 The relevant variables only change during ACK decipher when a request is sent during Phase 2 of $C_i.\Userinput$. Let $j' = i_r$ be the PIR index chosen in that phase. No relevant variable changes if $j' \neq j$, so assume $j' = j$. We apply the EUF-CMA property of $\Pi_{\ae}$. With probability $1 - \negl(\lambda)$, the $\ack$ variable defined in step (7a) by
 $$\ack = \Pi_{\ae}.\Dec(\sk_r, \ct_{\msg})$$
-is either equal to $\bot$, or equal to a message user $j$ encrypted using $\sk_r$. Since user $j$ only encrypts messages and ACKS to user $i$ using $\sk_r$, we conclude that either $\ack = \ACK(R')$ for some $R' \leq R_{t - 1}$, or $\ack$ is equal to a previous labeled message user $j$ sent to user $j$. 
+is either equal to $\bot$, or equal to a message user $j$ encrypted using $\sk_r$. Since user $j$ only encrypts messages and ACKs to user $i$ using $\sk_r$, we conclude that either $\ack = \ACK(R')$ for some $R' \leq R_{t - 1}$, or $\ack$ is equal to a previous labeled message user $j$ sent to user $i$. 
 
 If $\ack$ is equal to a labeled message or $\bot$, client $i$ will skip steps (7c) and (7d), and no variable will be changed. Now consider the case
 $$\ack = \ACK(R').$$
-In step (7.c), we have $C_i.\frienddb[\reg_j].\seqs = S_{t - 1}$. By the induction hypothesis, we have
+In step (7c), we have $C_i.\frienddb[\reg_j].\seqs = S_{t - 1}$. By the induction hypothesis, we have
 $$S_{t - 1} \geq R_{t - 1} \geq R'.$$
 So no variable is changed unless $S_{t - 1} = R_{t - 1} = R'$, in which case $S_t = R_{t - 1} + 1$, and after popping $\msg^{lb}_{ij}(S_{t - 1})$ we get
 $$C_i.\outb[\reg_j] = \{\msg^{lb}_{ij}(S_{t - 1} + 1), \cdots, \msg^{lb}_{ij}(E_t)\}.$$
@@ -88,15 +88,15 @@ We now show that $\Pi_{\asphr}$ satisfies \cref{defn:messaging-integrity}. We us
  
  We show that $t(i)$ exists as long as \cref{lem:messaging-correctness-main} holds at the current timestep $T_0$. We consider which scenario in the lemma holds. 
  
- If 1) holds, let $t(i) = T_0$. In this case, both sides of the equation are $\emptyset$.
+ If (1) holds, let $t(i) = T_0$. In this case, both sides of the equation are $\emptyset$.
  
- If 2) holds, let $t(i) = T_0$ if $\reg_i \notin C_j.\frienddb$ at the current timestep. Otherwise, let $t(i)$ be the timestep before $C_i.\send(\reg_j, \msg_{ij}(R_{t} + 1))$ is called(or the current timestep if $\msg_{ij}(R_{t} + 1)$ does not exist). If $\reg_i \notin C_j.\frienddb$, we have $R_t = 0$, so both sides of the equation are empty sets. Otherwise, by the definition of $\msg_{ij}(\ell)$, both sides of the equation are equal to $\{\msg_{ij}(1),\cdots, \msg_{ij}(R_t)\}$. So the equality in \cref{defn:messaging-integrity} holds when the property in \cref{lem:messaging-correctness-main} holds for all pair of honest users $i, j \in \cH$. Thus, \cref{lem:messaging-correctness-main} implies \cref{defn:messaging-integrity}.
+ If (2) holds, let $t(i) = T_0$ if $\reg_i \notin C_j.\frienddb$ at the current timestep. Otherwise, let $t(i)$ be the timestep before $C_i.\send(\reg_j, \msg_{ij}(R_{t} + 1))$ is called(or the current timestep if $\msg_{ij}(R_{t} + 1)$ does not exist). If $\reg_i \notin C_j.\frienddb$, we have $R_t = 0$, so both sides of the equation are empty sets. Otherwise, by the definition of $\msg_{ij}(\ell)$, both sides of the equation are equal to $\{\msg_{ij}(1),\cdots, \msg_{ij}(R_t)\}$. So the equality in \cref{defn:messaging-integrity} holds when the property in \cref{lem:messaging-correctness-main} holds for all pair of honest users $i, j \in \cH$. Thus, \cref{lem:messaging-correctness-main} implies \cref{defn:messaging-integrity}.
 
 The consistent prefix property in \cref{defn:messaging-correctness} is an easy corollary of \cref{defn:messaging-integrity} when the server behaves honestly.
  
- \textbf{Eventual Consistency}: We now show the eventual consistency property in \cref{defn:messaging-correctness}. Take the same choice of $t(i)$ as in the previous subsection. Let $T_{cons} = 2\lambda B^2 T^U_{\mathsf{trans}} \cdot T_1 + T_1.$ We show that this $T_{cons}$ satisfies the desired property. 
+ \subsubsection{Eventual consistency} We now show the eventual consistency property in \cref{defn:messaging-correctness}. Take the same choice of $t(i)$ as in the previous subsection. Let $T_{cons} = 2\lambda B^2 T^U_{\mathsf{trans}} \cdot T_1 + T_1.$ We show that this $T_{cons}$ satisfies the desired property. 
  
- We wish to show that if $T_0 \geq T_{cons}$, then with probability $1 - \negl(\lambda)$ we have $t(i) \geq T_1$. Let $E = \abs{\MSGS(T_1, i, j)}$(Note $E$ is independent of the protocol execution). If $R_{T_1} \geq E$, then by casework on the definition we always have $t(i) \geq T_1$. So it suffice to show that $R_{T_1} < R$ with negligible probability. 
+ We wish to show that if $T_0 \geq T_{cons}$, then with probability $1 - \negl(\lambda)$ we have $t(i) \geq T_1$. Let $E = \abs{\MSGS(T_1, i, j)}$ (note that $E$ is independent of the protocol execution). If $R_{T_1} \geq E$, then by casework on the definition we always have $t(i) \geq T_1$. So it suffices to show that $R_{T_1} < R$ with negligible probability. 
  
  We use the same notation as \cref{lem:messaging-correctness-main}. For each $k \leq E$, let $X_k$ be the random variable denoting the first $t$ such that $R_t \geq k$, with $X_0 = 0$. Let $Y_k$ denote the first $t$ such that $S_{t} > k$. It suffices to show that for any $k \leq E$, we have
  $$Y_k - X_k > \lambda B^2 T^U_{\mathsf{trans}}$$
@@ -106,13 +106,13 @@ The consistent prefix property in \cref{defn:messaging-correctness} is an easy c
  $$(i_t, j_t), (i_{t + K}, j_{t + K}), (i_{t + 2K}, j_{t + 2K})\cdots$$
 are mutually independent since client $i$ and client $j$ both made a non-empty request to the server during timestep $(t, t + K]$. Therefore, the probability that $Y_k - X_k > \lambda B^2 T^U_{\mathsf{trans}}$ is at most
 $$(1 - B^{-2})^{\lambda B^2 T^U_{\mathsf{trans}} / K} = \negl(\lambda)$$
-as desired. Analogous, the event $X_{k} - \max(Y_{k - 1}, T_1) > \lambda B^2 T^U_{\mathsf{trans}}$ is also negligible. Thus, eventual consistency holds for $\Pi_{\asphr}$.
+as desired. Analogously, the event $X_{k} - \max(Y_{k - 1}, T_1) > \lambda B^2 T^U_{\mathsf{trans}}$ is also negligible. Thus, eventual consistency holds for $\Pi_{\asphr}$.
 \subsection{Proof of Security}
 In this section we show that $\Pi_{\asphr}$ satisfies \cref{defn:messaging-security}. 
 
 Let $N'(\lambda) = N(\lambda)^2$ and $R'(\lambda) = 2N'(\lambda)T(\lambda)$. Assume the simulator $\Sim_{\ae}$ satisfy \cref{defn:AE-eval-security} with parameters $(N, R)$ equal to $(N'(\lambda), R'(\lambda))$, and let $\Sim_{\pir}$ be a simulator satisfying \cref{defn:PIR-SIM-security} with parameters $(N, R) = (N(\lambda), R'(\lambda))$. 
 
-At step (2), (4.a), and (4.c) of \cref{expr:messaging-ideal-world}, the simulator $\Sim_{\asphr}$ runs modified versions of the client methods in the corresponding steps of \cref{expr:messaging-real-world} for each client $i \in \cH$. Modifications are marked with a siderule. 
+At step (2), (4a), and (4c) of \cref{expr:messaging-ideal-world}, the simulator $\Sim_{\asphr}$ runs modified versions of the client methods in the corresponding steps of \cref{expr:messaging-real-world} for each client $i \in \cH$. Modifications are marked with a siderule. 
 
 For each pair of honest users $i, j \in \cH$, let 
 $$(\sk_{ij, r}, \sk_{ij, w}) = \gensharedsecret(\reg_i, \reg_j)$$ 
@@ -129,7 +129,7 @@ $\mathbf{\Sim_{\asphr}.\Register}(1^{\lambda}, i, N)$
 No modification.
 \vspace{10pt}
 
-$\mathbf{\Sim_{\asphr}.\Userinput}(t, i, { \textbf{Hybrid 3:} \text{replace $\cI$ with $\Leak$}})$
+$\mathbf{\Sim_{\asphr}.\Userinput}(t, i, { \textbf{Hybrid 3: } \text{replace $\cI$ with $\Leak$}})$
 \vspace{5pt}
 \hrule
 \vspace{5pt}
@@ -158,7 +158,7 @@ If $\cI = \send(\reg, \msg)$,
 
 \begin{enumerate}
     \item Check that $\reg$ is in $\frienddb$. If not, skip to Phase 2.
-    \item If $\reg$ is the registration of $C_i$ itself, append $\msg$ to $\inb[\reg]$, and skip to Phase 2. \footnote{Skipping this step breaks consistent prefix.}
+    \item If $\reg$ is the registration of $C_i$ itself, append $\msg$ to $\inb[\reg]$, and skip to Phase 2.\footnote{Skipping this step breaks consistent prefix.}
     \item Add $1$ to $\frienddb[\reg].\seqe$. 
     \item Push $\msg^{lb} = (\frienddb[\reg].\seqe, \msg)$ to $\outb[\reg]$.
 \end{enumerate}
@@ -175,8 +175,8 @@ Phase 2:
     \item If $t$ is not divisible by $T_{\trans}$, return $\emptyset$.
     \item Let $\{\reg_1, \cdots, \reg_k\}$ be the keys of $\frienddb$, with $k\leq B$. Construct $S = [\reg_1,\cdots, \reg_k, \reg, \cdots, \reg]$, where we add $B - k$ copies of $\reg = (-1)$, a dummy registration info . Sample $\reg_s, \reg_r$ uniformly and independently at random from $S$. 
     \item Let $\msg^{lb}$ be the (labeled) message with sequence number $\frienddb[\reg_s].\seqs$ in $\outb[\reg_s]$. If $\outb[\reg_s]$ is empty, let $\msg^{lb} = (-1, 0^{L_{\msg}})$.
-    \item $\sk_w \leftarrow \frienddb[\reg_s].\sk[1]$. If $\reg_s$ does not exist in $\frienddb$, set $\sk_w \leftarrow \sk_{\dummy}.$
-    \item $\seqr \leftarrow \frienddb[\reg_s].\seqr$.
+    \item $\sk_w \leftarrow \frienddb[\reg_s].\sk[1]$. If $\reg_s = \reg_0$ or does not exist in $\frienddb$, set $\sk_w \leftarrow \sk_{\dummy}$.
+    \item $\seqr \leftarrow \frienddb[\reg_s].\seqr$. If $\reg_s = \reg_0$ or does not exist in $\frienddb$, set $\seqr \leftarrow -1.$
     \item Encrypt Messages with $\sk_w$.
 
     \begin{siderule}
@@ -248,7 +248,7 @@ $\mathbf{\Sim_{\asphr}.\Serverrpc}(t, \resp)$
     \end{enumerate}
 \end{enumerate}
 
-We use a hybrid argument to show that the two views are indistinguishable. We start from the original implementation of the client methods $\Pi_{\asphr}.C$, and use a hybrid argument to transform it into the simulator methods $\Sim_{\asphr}$. We call the Real-World Experiment $\Hyb_0$.  
+We use a hybrid argument to show that the two views are indistinguishable. We start from the original implementation of the client methods $\Pi_{\asphr}.C$, and use a hybrid argument to transform it into the simulator methods $\Sim_{\asphr}$. We call the real-world experiment $\Hyb_0$.  
 
 % The todo's below have been resolved.
 

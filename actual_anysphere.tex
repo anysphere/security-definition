@@ -1,12 +1,12 @@
 \section{Prioritization}
 \label{sec:actual-asphr-protocol}
-Anysphere's client-side source code can be found at \cite{LZA2022implementation}. Our implementation mostly adheres to the core protocol described in \cref{subsec:core-protocol}. However, the core protocol is very inefficient: for each pair of communicating users $i, j$, each PIR query from $i$ has a probability of $B^{-1}$ to retrieve from $j$'s mailbox in the database, and $j$ has a probability of $B^{-1}$ to put the message to $i$ there. Therefore, the expected time between $j$ sending a message and $i$ receiving a message is $T_{\mathsf{trans}} B^2$. Due to the high cost of handling PIR queries, our system takes $T_{\mathsf{trans}} \approx 30s$. If a user is allowed to have $20$ friends, this results in a latency of three hours per single-trip delivery, which is not practical.
+Anysphere's client-side source code is at \cite{LZA2022implementation}. Our implementation mostly adheres to the core protocol described in \cref{subsec:core-protocol}. However, the core protocol is very inefficient as stated: for each pair of communicating users $i, j$, each PIR query from $i$ has a probability of $B^{-1}$ to retrieve from $j$'s mailbox in the database, and $j$ has a probability of $B^{-1}$ to put the message to $i$ there. Therefore, the expected time between $j$ sending a message and $i$ receiving a message is $T_{\mathsf{trans}} B^2$. Due to the high cost of handling PIR queries, our system takes $T_{\mathsf{trans}} \approx 30s$. If a user is allowed to have $20$ friends, this results in a latency of three hours per single-trip delivery, which is not practical.
 
-We can use efficient batch PIR retrieval \cite{BIM2000multiretrival, YERA2004batchcode, angel2016unobservable, liutromer2021}, which allows a client to retrieve from all friends at once with $O(n)$ server work. However, since each client can only deposit one message into their mailbox at a time, the single-trip latency is still about $B \cdot 3T_{\trans} \approx 600s$, where the constant $3$ accounts for the additional work the server has to do for batch retrieval. If we expand the mailbox to allow each user to deposit multiple messages at once, the cost of PIR queries scales linearly with the size of the mailbox, so it is hard to save more work.
+We can use efficient batch PIR retrieval \cite{BIM2000multiretrival, YERA2004batchcode, angel2016unobservable, liutromer2021}, which allows a client to retrieve from all friends at once with $O(N)$ server work. However, since each client can only deposit one message into their mailbox at a time, the single-trip latency is still about $B \cdot 3T_{\trans} \approx 600s$, where the constant $3$ accounts for the additional work the server has to do for batch retrieval. If we expand the mailbox to allow each user to deposit multiple messages at once, the cost of PIR queries scales linearly with the size of the mailbox, so it is hard to save more work.
 
-In our code, we use an optimization we name "priorization" to address this problem. The idea is that when choosing $\reg_s$ and $\reg_r$ in Phase 2 step (2) of $\Userinput()$, we define a set of ``prioritized users" based on message history, and select $\reg_s$ and $\reg_r$ from these users. For example, the sender should prioritize transmitting to receivers with a non-empty outbox, and the receiver should prioritize retrieving from senders who are more likely to send a message.
+In our code, we use an optimization we name ``prioritization'' to address this problem. When choosing $\reg_s$ and $\reg_r$ in Phase 2 step (2) of $\Userinput()$, the clients select a set of ``prioritized users", and select $\reg_s$ and $\reg_r$ from these users. Ideally, the prioritized users are friends who are actively conversing with the client.
 
-More formally, our client support a \textbf{priority function}
+More formally, our clients support a \textbf{priority function}
 $$C.\getPriority(\reg) \to (p_{\reg, s}, p_{\reg, r})$$
 that takes in a registration info $\reg$ and outputs priorities $p_{\reg, s}, p_{\reg_r}$ for sending and receiving messages from and to the user. Phase 2 of $\Pi_{\asphr}.C.\Userinput(t, \cI)$ is modified as follows.
 
@@ -31,31 +31,31 @@ $\mathbf{\Pi^{\getPriority}_{\asphr}.C.\Userinput}(t, \cI)$, Phase 2
 We call this modified protocol the \textbf{core protocol with prioritization}, and denote it
 $$\Pi_{\asphr}^{\getPriority}.$$
 
-\textbf{Example 1}: If we set $p_{i, s} = p_{i, r} = 1$ for $i \geq 1$ and $p_{0, s} = p_{0, r} = B - k$, we recover the original protocol defined in \cref{subsec:core-protocol}.
+\textbf{Example 1}: If the client sets $p_{i, s} = p_{i, r} = 1$ for $i \geq 1$ and $p_{0, s} = p_{0, r} = B - k$, we recover the original protocol defined in \cref{subsec:core-protocol}.
 
-\textbf{Example 2}: If we set $p_{i, s} = p_{i, r} = 1$ for $i \geq 1$ and $p_{0, s} = p_{0, r} = 0$, we get a slightly more efficient protocol where we select a random friend to send and retrieve. The tradeoff is a small metadata leakage already described in \cite{angel2018cf}: an adversary can learn the number of friends a friend has by measuring latency.
+\textbf{Example 2}: If the client sets $p_{i, s} = p_{i, r} = 1$ for $i \geq 1$ and $p_{0, s} = p_{0, r} = 0$, we get a slightly more efficient protocol where we select a random friend to send to and retrieve from. The tradeoff is a small metadata leakage already described in \cite{angel2018cf}: an adversary can learn the number of friends a friend has by measuring latency.
 
-\textbf{Example 3}: Some priority functions can lead to more serious metadata leakage. For example, consider the "intuitive" optimization which assign higher priority to friends with non-empty outbox. Suppose a user $i$ disconnects. If user $j$ is user $i$'s friend, then $j$'s outbox to $i$ is always nonempty since $j$ does not receive ACKs from $i$, so $j$'s latency with other users would increase as well. The latency increase propagates across the social graph until it reaches the compromised clients. Therefore, a very powerful adversary can potentially learn the whole social graph by DoSing each client and observing how the latency of the compromised clients increases.
+\textbf{Example 3}: Some priority functions can lead to more serious metadata leakage. For example, consider the ``intuitive'' optimization which assigns higher priority to friends with non-empty outbox. Suppose a user $i$ disconnects from the internet. If user $j$ is user $i$'s friend and sends $i$ at least one message after the disconnect, $j$'s outbox to $i$ would always be nonempty since $j$ does not receive ACKs from $i$, so $j$'s latency with other users would increase as well. The latency increase propagates across the social graph until it reaches the compromised clients. Therefore, a very powerful adversary can potentially learn the whole social graph by DoSing each client and observing how the latency of the compromised clients changes. It could then plausibly map this social graph onto any other public friend graph (say Facebook's) to determine exactly who is talking to whom.
 
 Fortunately, we can provably prevent metadata leakage by imposing the following condition on the priority function.
 
 \begin{definition}
 \label{defn:messaging-static-priority}
-We say the priority function $C.\getPriority(\reg)$ is \textbf{static} if its output on timestep $T$ is uniquely determined by the argument $\reg$ and the user inputs $\cI_t$ to $C$ on timesteps $t \leq T$. In other words, there exists a function $\getPriority$ such that on timestep $T$ we have
+The priority function $C.\getPriority(\reg)$ is \textbf{static} if its output on timestep $T$ is uniquely determined by the argument $\reg$ and the user inputs $\cI_t$ to $C$ on timesteps $t \leq T$. In other words, there exists a function $\getPriority$ such that on timestep $T$ we have
 $$C.\getPriority(\reg) = \getPriority(\{\cI_{t}\}_{t \in [T]}, \reg).$$
 
-If $\getPriority()$ is a static priority function, we define its \textbf{Leakage} as
+If $C.\getPriority(\cdot)$ is a static priority function, we define its \textbf{leakage} as
 $$\Leak_{\getPriority}(\{\cI_{i, t}\}_{i \in \cH, t \in [T]}, \reg_{\cH}) = (S_1, S_2).$$
 where
 \begin{align*} 
-S_1 =& \{(i, t, \reg, p_{s}, p_{r}): i \in \cH, t \in [T], \reg \notin \reg_{\cH}  \\
+S_1 =& \{(i, t, \reg, p_{s}, p_{r}): i \in \cH, t \in [T], \reg \notin \reg_{\cH} \sqcup \reg_0 \\
  &\land \exists t' \leq t, \trust(\reg) = \cI_{i, t'}  \\
-  &\land p_{s}, p_{r} = \getPriority(\{\cI_{i, t'}\}_{t' \in [t]}, \reg).\}
+  &\land (p_{s}, p_{r}) = \getPriority(\{\cI_{i, t'}\}_{t' \in [t]}, \reg).\}
 \end{align*}
 and
 \begin{align*} 
 S_2 =& \{(i, t, p_{s, \cH}, p_{r, \cH}): i \in \cH, t \in [T],  \\
- &\land \exists t' \leq t, \reg \notin \reg_{\cH}, \trust(\reg) = \cI_{i, t'}  \\
+ &\land \exists t' \leq t, \reg \notin \reg_{\cH} \sqcup \reg_0, \trust(\reg) = \cI_{i, t'}  \\
   &\land (p_{s, \cH}, p_{r, \cH}) = \sum_{\reg \in \reg_{\cH} \sqcup \reg_0} \getPriority(\{\cI_{i, t'}\}_{t' \in [t]}, \reg)\}
 \end{align*}
 where $\reg_0 = (-1)$ is the dummy registration info.
@@ -64,14 +64,14 @@ For each user with compromised friend, the leakage consists of the priority of e
 
 Using the same method in \cref{sec:proofs}, we can prove the correctness, security and integrity of the prioritized protocol $\Pi^{\getPriority}_{\asphr}$.
 \begin{theorem}
-Suppose the priority function $C.\getPriority$ is static, and its output is always in the range $[P_L, P_U]$ for positive constants $P_L, P_U$. Then the prioritized core protocol $\Pi^{\getPriority}_{\asphr}$ guarantees correctness(\cref{defn:messaging-correctness}) and integrity(\cref{defn:messaging-integrity}). $\Pi^{\getPriority}_{\asphr}$ is also SIM-secure as defined in \cref{defn:messaging-security}, but with the leakage function in the ideal world experiment \cref{defn:messaging-ideal-world-experiment} replaced by
+Suppose the priority function $C.\getPriority(\cdot)$ is static, and its output is always in the range $[P_L, P_U]$ for positive constants $P_L, P_U$. Then the prioritized core protocol $\Pi^{\getPriority}_{\asphr}$ guarantees correctness(\cref{defn:messaging-correctness}) and integrity(\cref{defn:messaging-integrity}). $\Pi^{\getPriority}_{\asphr}$ is also SIM-secure (\cref{defn:messaging-security}), but with the leakage function in the ideal world experiment \cref{defn:messaging-ideal-world-experiment} replaced by
 $$\Leak'(\{\cI_{i, t}\}_{i \in \cH, t \in [T]}, \reg_{\cH}) = (\Leak_f, \Leak_m, \Leak_{\getPriority})$$
 where $\Leak_f$ and $\Leak_m$ are defined in \cref{defn:messaging-leakage} and $\Leak_{\getPriority}$ is defined in \cref{defn:messaging-static-priority}.
 \end{theorem}
 
-The proofs of correctness and integrity are the same. The proof of security is very similar, except we need to change Hybrid 3 to ensure that compromised friends are chosen as $\reg_s$ and $\reg_r$ with the probability defined in the modified $\Pi^{\getPriority}_{\asphr}$.
+The proofs of correctness and integrity are the same. The proof of security is very similar, except we change Hybrid 3 to ensure that compromised friends are chosen as $\reg_s$ and $\reg_r$ with the probability defined in the modified $\Pi^{\getPriority}_{\asphr}$.
 
 We are exploring the best priority function. Currently, the client assigns higher priorities $(p_{\reg, s}, p_{\reg, r})$ to friend $\reg$ if the user sent message to $\reg$ more recently. During a synchronous conversation between two users, we can achieve a latency of almost $2T_{\trans} \approx 60s$ because the users put each other on high priority. 
 
-On the other hand, if a user has a compromised friend, the adversary can theoretically learn their number of friends and the number of active conversations they participate in using the CF attack described in \cite{angel2018cf}. Angel et. al. argues in the same paper that the attack is hard to execute in practice. Therefore, we believe that the amount of information leaked is small compared to the massive efficiency benefit, so our use of prioritization is justified.
+On the other hand, if a user has a compromised friend, the adversary can theoretically learn their number of friends and the number of active conversations they participate in using the CF attack described in \cite{angel2018cf}. Angel et al. argues in the same paper that the attack is hard to execute in practice. Therefore, we believe that the amount of information leaked is small compared to the massive efficiency benefit, so our use of prioritization is justified.
 

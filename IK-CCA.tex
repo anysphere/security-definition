@@ -1,7 +1,7 @@
 \section{IK-CCA implies Eval-Security}
 \label{sec:IND-CCPKA}
 In this section, we propose a symmetric key analog of the IK-CCA security introduced by Bellare et. al. in \cite[Definition 1]{BBDP01keyprivate}.
-We then show that IK-CCA security implies the Eval-Security \cref{defn:AE-eval-security} needed for the security of our system.
+We then show that IK-CCA security implies the eval-security \cref{defn:AE-eval-security} needed for the security of our system.
 
 Recall that an AE scheme $\Pi_{\ae}$ consists of algorithms $(\gen, \enc, \dec)$ with syntax defined in \cref{subsec:AE}. 
 
@@ -19,7 +19,7 @@ Distinguishing Game $\mathbf{Exp}_{\mathsf{IK-CCA}}^{\cA}$
     \item $b' \leftarrow \cA^{\Enc(\{\sk_{i}\}, \cdot), \Dec(\{\sk_{i}\}, \cdot)}(\ct)$.
 \end{enumerate}
 \end{framed}
-\caption{Distinguishing Game for IK-CCA security}
+\caption{Distinguishing game for IK-CCA security.}
 \label{expr:AE-IKCCA-Distinguish}
 \end{figure}
 
@@ -43,6 +43,7 @@ Assume that $\Pi_{\ae}$ is IK-CCA. We now show that $\Pi_{\ae}$ is Eval-secure. 
         \item $\cA$ stores $\ct^{0}_r$.
     \end{enumerate}
 \end{enumerate}
+\vspace{0.2cm}
 \textbf{Ideal-World Experiment $\Ideal^{\cA}_{\Eval}$}
 \begin{enumerate}
     \item For $i$ from $1$ to $N$, $\sk_i \leftarrow \gen(1^{\lambda}).$
@@ -54,7 +55,7 @@ Assume that $\Pi_{\ae}$ is IK-CCA. We now show that $\Pi_{\ae}$ is Eval-secure. 
     \end{enumerate}
 \end{enumerate}
 \end{framed}
-\caption{Recap of \cref{defn:AE-eval-security}}
+\caption{Recap of \cref{defn:AE-eval-security}.}
 \end{figure}
 We use a standard hybridizing argument to show that the views of $\cA$ are indistinguishable. 
 \begin{definition}
